@@ -1,0 +1,6 @@
+@FootballManagerBackend_HostAddress = http://localhost:5253
+
+GET {{FootballManagerBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
