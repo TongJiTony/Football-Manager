@@ -1,6 +1,6 @@
-@FootballManagerBackend_HostAddress = http://localhost:5253
+@FootballManagerBackend_HostAddress = http://localhost:5000
 
-GET {{FootballManagerBackend_HostAddress}}/weatherforecast/
+GET {{FootballManagerBackend_HostAddress}}/v1/playerdisplay/all
 Accept: application/json
 
 ###
