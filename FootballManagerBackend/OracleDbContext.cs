@@ -44,6 +44,46 @@
 
             return results;
         }
+
+        public async Task<List<Dictionary<string, object>>> ExecuteQueryAsync(string query, IDictionary<string, object> parameters = null)
+        {
+            using (var connection = new OracleConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            command.Parameters.Add(new OracleParameter(param.Key, param.Value));
+                        }
+                    }
+
+                    var result = new List<Dictionary<string, object>>();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var dict = new Dictionary<string, object>();
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                dict.Add(reader.GetName(i), reader.GetValue(i));
+                            }
+
+                            result.Add(dict);
+                        }
+                    }
+
+                    return result;
+                }
+            }
+        }
     }
 
 }

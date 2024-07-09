@@ -15,11 +15,21 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
+        public async Task<IActionResult> Get()
+        {
+            string query = "SELECT * FROM players";
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            string query = "SELECT * FROM players WHERE player_id='" + id + "'";
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+            string query = "SELECT * FROM players WHERE player_id = :id";
+            var parameters = new Dictionary<string, object> { { "id", id } };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
         }
     }
