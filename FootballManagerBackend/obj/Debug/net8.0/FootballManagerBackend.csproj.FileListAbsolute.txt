@@ -30,3 +30,12 @@ D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\obj\Debug\net8.0
 D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\obj\Debug\net8.0\FootballManagerBackend.pdb
 D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\obj\Debug\net8.0\FootballManagerBackend.genruntimeconfig.cache
 D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\obj\Debug\net8.0\ref\FootballManagerBackend.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\Oracle.ManagedDataAccess.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\System.Diagnostics.PerformanceCounter.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\System.DirectoryServices.Protocols.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.PerformanceCounter.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\runtimes\linux\lib\net8.0\System.DirectoryServices.Protocols.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\runtimes\osx\lib\net8.0\System.DirectoryServices.Protocols.dll
+D:\VS解决方案\FootballManagerBackend\FootballManagerBackend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.DirectoryServices.Protocols.dll
