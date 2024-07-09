@@ -12,7 +12,6 @@ namespace FootballManagerBackend
             // Add services to the container.
             // 添加服务到依赖注入容器
             builder.Services.AddSingleton<OracleDbContext>();
-
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
