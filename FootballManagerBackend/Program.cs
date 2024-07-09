@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 namespace FootballManagerBackend
 {
     public class Program
@@ -7,11 +10,13 @@ namespace FootballManagerBackend
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            // 添加服务到依赖注入容器
+            builder.Services.AddSingleton<OracleDbContext>();
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Configuration.AddJsonFile("appsettings.json");
 
             var app = builder.Build();
 
@@ -20,6 +25,7 @@ namespace FootballManagerBackend
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
