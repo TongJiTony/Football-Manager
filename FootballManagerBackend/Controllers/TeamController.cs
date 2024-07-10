@@ -14,7 +14,13 @@ namespace FootballManagerBackend.Controllers
         {
             _context = context;
         }
-
+        [HttpGet("all")]
+        public async Task<IActionResult> Get()
+        {
+            string query = "SELECT * FROM teams";
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+            return Ok(result);
+        }
         [HttpGet("{Teamid}")]
         public async Task<IActionResult> Get(string Teamid)
         {
