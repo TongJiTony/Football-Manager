@@ -17,15 +17,25 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string? teamid = null)
         {
-            string query = "SELECT * FROM players";
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
-            return Ok(result);
+            string query = "SELECT * FROM players ORDER BY player_name";
+            if (teamid != null)
+            {
+                query = "SELECT * FROM players WHERE team_id = :teamid ORDER BY player_name";
+                var parameters = new Dictionary<string, object> { { "teamid", teamid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else
+            {
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+                return Ok(result);
+            }
         }
 
         [HttpGet("{Playerid}")]
-        public async Task<IActionResult> Get(string Playerid)
+        public async Task<IActionResult> Get(int Playerid)
         {
             string query = "SELECT * FROM players WHERE player_id = :Playerid";
             var parameters = new Dictionary<string, object> { { "Playerid", Playerid } };
