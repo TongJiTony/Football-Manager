@@ -1199,11 +1199,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
+      "projectUniqueName": "E:\\FMbackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
       "projectName": "FootballManagerBackend",
-      "projectPath": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
+      "projectPath": "E:\\FMbackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
       "packagesPath": "C:\\Users\\王天阔\\.nuget\\packages\\",
-      "outputPath": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\obj\\",
+      "outputPath": "E:\\FMbackend\\FootballManagerBackend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\王天阔\\AppData\\Roaming\\NuGet\\NuGet.Config",
