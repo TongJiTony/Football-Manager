@@ -34,7 +34,7 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost] //仅测试
         public async Task<IActionResult> Post([FromBody] JsonElement teamElement)
         {
             string query = "INSERT INTO teams (team_name, established_date, head_coach, city, team_id) VALUES (:name, :checkdate, :coach, :city, :id)";
