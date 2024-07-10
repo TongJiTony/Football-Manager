@@ -35,14 +35,14 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] JsonElement teamElement)
+        public async Task<IActionResult> Post([FromBody] JsonElement playerElement)
         {
             string query = "INSERT INTO players (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) VALUES (:id, :name, :checkdate, :team, :rolein, :foot, :health, :ranking, :game, :trans, :show)";
 
             var parameters = new Dictionary<string, object>();
 
             // 从 JsonElement 中获取值，并进行类型转换
-            foreach (var property in teamElement.EnumerateObject())
+            foreach (var property in playerElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
