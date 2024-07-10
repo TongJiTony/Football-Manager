@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "eNqMudleelyI8Zm06YTs+rZ2x4sovGOnsTF+GqqbirE1eKVBkawXVph/lx4xxO8RCSHY7NdYMOp7egljkUQP4g==",
+  "dgSpecHash": "nwiEZnq3QyUqc3d//dMs1aaxBWgX1+Nh94iEQoX/UYDiK0vyIBfbs6+zdeCrmHPRRWu3ruaC4biV+YHnClNJ+A==",
   "success": true,
-  "projectFilePath": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
+  "projectFilePath": "E:\\FMbackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\王天阔\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "C:\\Users\\王天阔\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
