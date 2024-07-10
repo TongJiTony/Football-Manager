@@ -24,20 +24,20 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        [HttpGet("{Playerid}")]
+        public async Task<IActionResult> Get(string Playerid)
         {
-            string query = "SELECT * FROM players WHERE player_id = :id";
-            var parameters = new Dictionary<string, object> { { "id", id } };
+            string query = "SELECT * FROM players WHERE player_id = :Playerid";
+            var parameters = new Dictionary<string, object> { { "Playerid", Playerid } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
         }
 
-        [HttpPost] //仅测试
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] JsonElement teamElement)
         {
-            string query = "INSERT INTO teams (team_name, established_date, head_coach, city, team_id) VALUES (:name, :checkdate, :coach, :city, :id)";
+            string query = "INSERT INTO players (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) VALUES (:id, :name, :checkdate, :team, :rolein, :foot, :health, :ranking, :game, :trans, :show)";
 
             var parameters = new Dictionary<string, object>();
 
@@ -46,10 +46,13 @@ namespace FootballManagerBackend.Controllers
             {
                 switch (property.Name.ToLower())
                 {
-                    case "team_name":
+                    case "player_id":
+                        parameters.Add("id", property.Value.GetInt32());
+                        break;
+                    case "player_name":
                         parameters.Add("name", property.Value.GetString());
                         break;
-                    case "established_date":
+                    case "birthday":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                         {
                             parameters.Add("checkdate", dateValue);
@@ -57,18 +60,33 @@ namespace FootballManagerBackend.Controllers
                         else
                         {
                             // 返回错误信息
-                            Console.WriteLine($"Invalid date format for established_date: {property.Value.GetString()}");
+                            Console.WriteLine($"Invalid date format for birthday: {property.Value.GetString()}");
 
                         }
                         break;
-                    case "head_coach":
-                        parameters.Add("coach", property.Value.GetString());
-                        break;
-                    case "city":
-                        parameters.Add("city", property.Value.GetString());
-                        break;
                     case "team_id":
-                        parameters.Add("id", property.Value.GetInt32());
+                        parameters.Add("team", property.Value.GetInt32());
+                        break;
+                    case "role":
+                        parameters.Add("rolein", property.Value.GetString());
+                        break;
+                    case "used_foot":
+                        parameters.Add("foot", property.Value.GetInt32());
+                        break;
+                    case "health_state":
+                        parameters.Add("health", property.Value.GetInt32());
+                        break;
+                    case "rank":
+                        parameters.Add("ranking", property.Value.GetInt32());
+                        break;
+                    case "game_state":
+                        parameters.Add("game", property.Value.GetInt32());
+                        break;
+                    case "trans_state":
+                        parameters.Add("trans", property.Value.GetInt32());
+                        break;
+                    case "is_show":
+                        parameters.Add("show", property.Value.GetInt32());
                         break;
                     default:
 
@@ -77,9 +95,7 @@ namespace FootballManagerBackend.Controllers
             }
 
             await _context.ExecuteNonQueryAsync(query, parameters);
-            return CreatedAtAction(nameof(Get), new { Teamid = parameters["id"] }, parameters);
+            return CreatedAtAction(nameof(Get), new { Playerid = parameters["id"] }, parameters);
         }
     }
-
-    
 }
