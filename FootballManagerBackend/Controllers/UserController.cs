@@ -84,7 +84,7 @@ new OracleParameter(":new_user_id", OracleDbType.Decimal, ParameterDirection.Out
 
                 if (result != null && result.Count == 1)
                 {
-                    if (result[0].ContainsValue(loginReq.user_password))//进不去
+                    if (result[0].ContainsValue(loginReq.user_password))
                     {
                         return Ok("Authentication successful");
                     }
@@ -96,6 +96,64 @@ new OracleParameter(":new_user_id", OracleDbType.Decimal, ParameterDirection.Out
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        //POST v1/user/changePassword
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> PostUserChangePassword([FromBody] FootballManagerBackend.Models.ChangePasswordRequest ChangePasswordReq)
+        {
+            try
+            {
+                string query = "SELECT user_password FROM users WHERE user_id = :id";
+                var parameters = new Dictionary<string, object> { { "id", ChangePasswordReq.user_id } };
+
+                List<Dictionary<string, object>> rawResult = await _context.ExecuteQueryAsync(query, parameters);
+                List<Dictionary<string, string>> result = rawResult.Select(d => d.ToDictionary(kv => kv.Key, kv => kv.Value.ToString())).ToList();
+
+                if (result != null && result.Count == 1)
+                {
+                    if (result[0].ContainsValue(ChangePasswordReq.user_password))
+                    {
+                        //根据user_id在users表中寻找对应记录，修改其中的user_password，改为new_password
+                        string updateQuery = "UPDATE users SET user_password = :newPassword WHERE user_id = :id";
+                        var updateParameters = new Dictionary<string, object>
+                {
+                    { "newPassword", ChangePasswordReq.new_password }, // 使用 ChangePasswordReq 中的 new_password 属性来存放新密码
+                    { "id", ChangePasswordReq.user_id }
+                };
+
+                        // 执行异步命令，更新数据库中的用户密码
+                        int rowsUpdated = await _context.ExecuteNonQueryAsync(updateQuery, updateParameters);
+
+                        // 检查是否成功更新密码并返回相应的结果
+                        if (rowsUpdated > 0)
+                        {
+                            return Ok("Password changed successfully");
+                        }
+                        else
+                        {
+                            return StatusCode(500, "Failed to update password");
+                        }
+                    }
+                }
+                return BadRequest("Authentication failed");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 

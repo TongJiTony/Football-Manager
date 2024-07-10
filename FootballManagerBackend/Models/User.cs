@@ -52,5 +52,12 @@
         public string user_password { get; set; }
     }
 
+    public class ChangePasswordRequest
+    {
+        public long user_id { get; set; }
+        public string user_password { get; set; }
+        public string new_password {  get; set; }
+    }
+
 
 }
