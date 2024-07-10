@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj": {}
+    "C:\\Users\\22574\\Desktop\\test\\Football-Manager\\FootballManagerBackend\\FootballManagerBackend.csproj": {}
   },
   "projects": {
-    "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj": {
+    "C:\\Users\\22574\\Desktop\\test\\Football-Manager\\FootballManagerBackend\\FootballManagerBackend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
+        "projectUniqueName": "C:\\Users\\22574\\Desktop\\test\\Football-Manager\\FootballManagerBackend\\FootballManagerBackend.csproj",
         "projectName": "FootballManagerBackend",
-        "projectPath": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\FootballManagerBackend.csproj",
-        "packagesPath": "C:\\Users\\王天阔\\.nuget\\packages\\",
-        "outputPath": "D:\\VS解决方案\\FootballManagerBackend\\FootballManagerBackend\\obj\\",
+        "projectPath": "C:\\Users\\22574\\Desktop\\test\\Football-Manager\\FootballManagerBackend\\FootballManagerBackend.csproj",
+        "packagesPath": "C:\\Users\\22574\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\22574\\Desktop\\test\\Football-Manager\\FootballManagerBackend\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\王天阔\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\22574\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -77,7 +82,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
