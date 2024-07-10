@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/FootballManagerBackend/obj/Debug/net8.0/FootballManagerBackend.AssemblyInfo.cs
+/FootballManagerBackend/obj/Debug/net8.0/FootballManagerBackend.AssemblyInfoInputs.cache
+/FootballManagerBackend/obj/Debug/net8.0/FootballManagerBackend.assets.cache
+/FootballManagerBackend/obj/Debug/net8.0/FootballManagerBackend.GeneratedMSBuildEditorConfig.editorconfig
