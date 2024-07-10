@@ -84,6 +84,45 @@
                 }
             }
         }
-    }
 
+        public async Task<int> ExecuteNonQueryAsync(string query, IDictionary<string, object> parameters = null)
+        {
+            using (var connection = new OracleConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            try
+                            {
+                                command.Parameters.Add(new OracleParameter(param.Key, param.Value ?? DBNull.Value));
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error creating parameter {param.Key}: {ex.Message}");
+                                throw;
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        return await command.ExecuteNonQueryAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error executing query: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
+        }
+
+    }
 }
