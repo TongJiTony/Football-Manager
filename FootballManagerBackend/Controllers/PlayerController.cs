@@ -109,7 +109,7 @@ namespace FootballManagerBackend.Controllers
             await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
             int newPlayerId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
 
-            return CreatedAtAction(nameof(Get), new { Playerid = newPlayerId }, new { Playerid = newPlayerId });
+            return CreatedAtAction(nameof(Get), new { PLAYER_ID = newPlayerId }, new { PLAYER_ID = newPlayerId });
         }
 
         [HttpPost("update")] // POST /v1/player/update?playerid=* + JSON
