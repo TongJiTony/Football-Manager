@@ -32,10 +32,10 @@ namespace FootballManagerBackend.Controllers
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
         }
-        [HttpPost("add")]// POST /v1/player/add
+        [HttpPost("add")]// POST /v1/team/add
         public async Task<IActionResult> Post([FromBody] JsonElement teamElement)
         {
-            string query = "INSERT INTO teams (team_name, established_date, head_coach, city) VALUES (:name, :checkdate, :coach, :city)";
+            string query = "INSERT INTO teams (team_name, established_date, head_coach, city,team_id) VALUES (:name, :checkdate, :coach, :city,TEAM_SEQ.NEXTVAL)";
 
             var parameters = new Dictionary<string, object>();
 
