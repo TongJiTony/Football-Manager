@@ -159,5 +159,30 @@
             return results;
         }
 
+        public async Task ExecuteNonQueryAsyncForAdd(string query, Dictionary<string, object> parameters = null, OracleParameter outParameter = null)
+        {
+            using (var connection = new OracleConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new OracleCommand(query, connection))
+                {
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            command.Parameters.Add(new OracleParameter(param.Key, param.Value));
+                        }
+                    }
+
+                    if (outParameter != null)
+                    {
+                        command.Parameters.Add(outParameter);
+                    }
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
     }
 }
