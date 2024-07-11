@@ -26,7 +26,7 @@ namespace FootballManagerBackend.Controllers
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
             return Ok(result);
         }
-        [HttpGet("{Teamid}")]
+        [HttpGet("displayone")]
         public async Task<IActionResult> Get(string Teamid)
         {
             string query = "SELECT * FROM teams WHERE team_id = :id";
@@ -86,7 +86,7 @@ namespace FootballManagerBackend.Controllers
             return CreatedAtAction(nameof(Get), new { Teamid = newTeamid }, new { Teamid = newTeamid });
         }
 
-        [HttpDelete("{Teamid}")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> Delete(string Teamid)
         {
             string query = "DELETE FROM teams WHERE team_id = :id";
@@ -113,7 +113,7 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
-        [HttpPost("{updateTeamid}")]
+        [HttpPost("update")]
         public async Task<IActionResult> Post(string updateTeamid, [FromBody] JsonElement teamElement)
         {
             if (!teamElement.EnumerateObject().Any())
