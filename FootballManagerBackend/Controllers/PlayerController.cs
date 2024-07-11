@@ -16,7 +16,7 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("all")]
+        [HttpGet("all")] // GET /v1/player/all or GET /v1/player/all?teamid=*
         public async Task<IActionResult> Get(string? teamid = null)
         {
             string query = "SELECT * FROM players ORDER BY player_name";
@@ -34,7 +34,7 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
-        [HttpGet("{Playerid}")]
+        [HttpGet("{Playerid}")] // GET /v1/player/*
         public async Task<IActionResult> Get(int Playerid)
         {
             string query = "SELECT * FROM players WHERE player_id = :Playerid";
@@ -44,14 +44,13 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost] // POST /v1/player
         public async Task<IActionResult> Post([FromBody] JsonElement playerElement)
         {
             string query = "INSERT INTO players (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) VALUES (:id, :name, :checkdate, :team, :rolein, :foot, :health, :ranking, :game, :trans, :show)";
 
             var parameters = new Dictionary<string, object>();
 
-            // 从 JsonElement 中获取值，并进行类型转换
             foreach (var property in playerElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
@@ -71,7 +70,6 @@ namespace FootballManagerBackend.Controllers
                         {
                             // 返回错误信息
                             Console.WriteLine($"Invalid date format for birthday: {property.Value.GetString()}");
-
                         }
                         break;
                     case "team_id":
@@ -99,7 +97,6 @@ namespace FootballManagerBackend.Controllers
                         parameters.Add("show", property.Value.GetInt32());
                         break;
                     default:
-
                         break;
                 }
             }
