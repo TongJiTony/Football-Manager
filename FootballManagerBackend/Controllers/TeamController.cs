@@ -38,7 +38,9 @@ namespace FootballManagerBackend.Controllers
         [HttpPost("add")]// POST /v1/team/add
         public async Task<IActionResult> Post([FromBody] JsonElement teamElement)
         {
+
             string query = @"INSERT INTO teams (team_name, established_date, head_coach, city,team_id) VALUES (:name, :checkdate, :coach, :city,TEAM_SEQ.NEXTVAL) RETURNING team_id INTO :new_id";
+
 
             var parameters = new Dictionary<string, object>();
             var outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
