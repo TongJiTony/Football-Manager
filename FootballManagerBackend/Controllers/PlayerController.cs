@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using System.Collections.Generic;
+using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -16,14 +19,14 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamid=*
-        public async Task<IActionResult> Get(string? teamid = null)
+        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamname=*
+        public async Task<IActionResult> Get(string? teamname = null)
         {
             string query = "SELECT * FROM players ORDER BY player_name";
-            if (teamid != null)
+            if (teamname != null)
             {
-                query = "SELECT * FROM players WHERE team_id = :teamid ORDER BY player_name";
-                var parameters = new Dictionary<string, object> { { "teamid", teamid } };
+                query = "SELECT player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players natural join teams WHERE team_name = :teamname ORDER BY player_name";
+                var parameters = new Dictionary<string, object> { { "teamname", teamname } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
@@ -47,17 +50,20 @@ namespace FootballManagerBackend.Controllers
         [HttpPost("add")] // POST /v1/player/add + JSON
         public async Task<IActionResult> Add([FromBody] JsonElement playerElement)
         {
-            string query = "INSERT INTO players (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) VALUES (:player_id, :player_name, :birthday, :team_id, :role, :used_foot, :health_state, :rank, :game_state, :trans_state, :is_show)";
+            string query = @"
+        INSERT INTO players 
+        (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) 
+        VALUES 
+        (PLAYER_SEQ.NEXTVAL, :player_name, :birthday, :team_id, :role, :used_foot, :health_state, :rank, :game_state, :trans_state, :is_show) 
+        RETURNING player_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
+            var outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
 
             foreach (var property in playerElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
-                    case "player_id":
-                        parameters.Add("player_id", property.Value.GetInt32());
-                        break;
                     case "player_name":
                         parameters.Add("player_name", property.Value.GetString());
                         break;
@@ -68,8 +74,7 @@ namespace FootballManagerBackend.Controllers
                         }
                         else
                         {
-                            // 返回错误信息
-                            Console.WriteLine($"Invalid date format for birthday: {property.Value.GetString()}");
+                            return BadRequest(new { message = $"Invalid date format for birthday: {property.Value.GetString()}" });
                         }
                         break;
                     case "team_id":
@@ -101,8 +106,10 @@ namespace FootballManagerBackend.Controllers
                 }
             }
 
-            await _context.ExecuteNonQueryAsync(query, parameters);
-            return CreatedAtAction(nameof(Get), new { Playerid = parameters["id"] }, parameters);
+            await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
+            int newPlayerId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
+
+            return CreatedAtAction(nameof(Get), new { Playerid = newPlayerId }, new { Playerid = newPlayerId });
         }
 
         [HttpPost("update")] // POST /v1/player/update?playerid=* + JSON
@@ -114,20 +121,17 @@ namespace FootballManagerBackend.Controllers
             }
 
             var queryBuilder = new System.Text.StringBuilder("UPDATE players SET ");
-            var parameters = new Dictionary<string, object>
-            {
-                { "playerid", playerid } // 预设ID参数，用于WHERE子句
-            };
+            var parameters = new Dictionary<string, object>();
 
             foreach (var property in teamElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
                     case "player_id":
-                        if (int.TryParse(property.Value.GetString(), out int teamId))
+                        if (int.TryParse(property.Value.GetString(), out int player_id))
                         {
                             queryBuilder.Append("player_id = :player_id, ");
-                            parameters.Add("player_id", teamId);
+                            parameters.Add("player_id", player_id);
                         }
                         else
                         {
@@ -192,6 +196,7 @@ namespace FootballManagerBackend.Controllers
             // 移除最后一个逗号和空格
             queryBuilder.Length -= 2;
             queryBuilder.Append(" WHERE player_id = :playerid");
+            parameters.Add("player_id", playerid);
             string query = queryBuilder.ToString();
             Console.WriteLine($"Generated Query: {query}");
 
