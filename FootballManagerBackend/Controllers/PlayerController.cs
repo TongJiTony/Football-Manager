@@ -211,5 +211,23 @@ namespace FootballManagerBackend.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPost("delete")] // POST /v1/player/delete?playerid=*
+        public async Task<IActionResult> Delete(int playerid)
+        {
+            string query = "DELETE FROM players WHERE player_id = :playerid";
+            var parameters = new Dictionary<string, object> { { "playerid", playerid } };
+
+            try
+            {
+                await _context.ExecuteNonQueryAsync(query, parameters);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing DELETE request: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }
