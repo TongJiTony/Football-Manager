@@ -212,7 +212,7 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
-        [HttpPost("delete")] // POST /v1/player/delete?playerid=*
+        [HttpDelete("delete")] // DELETE /v1/player/delete?playerid=*
         public async Task<IActionResult> Delete(int playerid)
         {
             string query = "DELETE FROM players WHERE player_id = :playerid";
