@@ -44,7 +44,7 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
-        [HttpPost("add")] // POST /v1/player/add
+        [HttpPost("add")] // POST /v1/player/add + JSON
         public async Task<IActionResult> Add([FromBody] JsonElement playerElement)
         {
             string query = "INSERT INTO players (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) VALUES (:player_id, :player_name, :birthday, :team_id, :role, :used_foot, :health_state, :rank, :game_state, :trans_state, :is_show)";
@@ -105,7 +105,7 @@ namespace FootballManagerBackend.Controllers
             return CreatedAtAction(nameof(Get), new { Playerid = parameters["id"] }, parameters);
         }
 
-        [HttpPost("update")]
+        [HttpPost("update")] // POST /v1/player/update?playerid=* + JSON
         public async Task<IActionResult> Update(int playerid, [FromBody] JsonElement teamElement)
         {
             if (!teamElement.EnumerateObject().Any())
