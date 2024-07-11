@@ -207,7 +207,7 @@ namespace FootballManagerBackend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error executing PUT request: {ex.Message}");
+                Console.WriteLine($"Error executing POST request: {ex.Message}");
                 return StatusCode(500, "Internal server error");
             }
         }
