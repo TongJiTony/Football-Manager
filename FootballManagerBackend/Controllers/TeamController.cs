@@ -22,14 +22,14 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayall")]
         public async Task<IActionResult> Get()
         {
-            string query = "SELECT * FROM teams ORDER BY team_name";
+            string query = "SELECT team_id,team_name, TO_CHAR(established_date,'YYYY-MM-DD') AS established_date, head_coach, city FROM teams ORDER BY team_name";
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
             return Ok(result);
         }
         [HttpGet("displayone")]
         public async Task<IActionResult> Get(string Teamid)
         {
-            string query = "SELECT * FROM teams WHERE team_id = :id";
+            string query = "SELECT team_id,team_name, TO_CHAR(established_date,'YYYY-MM-DD') AS established_date, head_coach, city FROM teams WHERE team_id = :id";
             var parameters = new Dictionary<string, object> { { "id", Teamid } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
