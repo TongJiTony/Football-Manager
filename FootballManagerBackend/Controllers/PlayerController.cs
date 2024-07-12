@@ -193,7 +193,6 @@ namespace FootballManagerBackend.Controllers
                 }
             }
 
-            // 移除最后一个逗号和空格
             queryBuilder.Length -= 2;
             queryBuilder.Append(" WHERE player_id = :playerid");
             parameters.Add("player_id", playerid);
