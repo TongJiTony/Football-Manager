@@ -109,7 +109,7 @@ namespace FootballManagerBackend.Controllers
             await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
             int newPlayerId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
 
-            return CreatedAtAction(nameof(Get), new { Playerid = newPlayerId }, new { Playerid = newPlayerId });
+            return CreatedAtAction(nameof(Get), new { PLAYER_ID = newPlayerId }, new { PLAYER_ID = newPlayerId });
         }
 
         [HttpPost("update")] // POST /v1/player/update?playerid=* + JSON
@@ -207,7 +207,25 @@ namespace FootballManagerBackend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error executing PUT request: {ex.Message}");
+                Console.WriteLine($"Error executing POST request: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpDelete("delete")] // DELETE /v1/player/delete?playerid=*
+        public async Task<IActionResult> Delete(int playerid)
+        {
+            string query = "DELETE FROM players WHERE player_id = :playerid";
+            var parameters = new Dictionary<string, object> { { "playerid", playerid } };
+
+            try
+            {
+                await _context.ExecuteNonQueryAsync(query, parameters);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing DELETE request: {ex.Message}");
                 return StatusCode(500, "Internal server error");
             }
         }
