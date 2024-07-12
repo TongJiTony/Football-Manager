@@ -106,11 +106,21 @@ namespace FootballManagerBackend.Controllers
                         // 用户验证成功，生成并返回令牌
                         string token = GenerateToken(userId, userRecord["USER_NAME"], userRecord["USER_RIGHT"]);
                         // 返回带有令牌的成功响应
-                        return Ok(new { token });
-                        //return Ok("Authentication successful");
-                    }
+                        var good_response = new
+                        {
+                            code = 200,
+                            msg = "登录成功",
+                            token = token
+                        };
+                        return Ok(good_response);
+                    } 
                 }
-                return BadRequest("Authentication failed");
+                var bad_response = new
+                {
+                    code = 500,
+                    msg = "密码错误，登录失败",
+                };
+                return BadRequest(bad_response);
             }
             catch (Exception ex)
             {
