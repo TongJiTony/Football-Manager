@@ -19,7 +19,7 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamname=*
+        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamid=*
         public async Task<IActionResult> Get(int? teamid = null)
         {
             string query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id ORDER BY player_id";
