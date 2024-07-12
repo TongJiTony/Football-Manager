@@ -20,13 +20,13 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamname=*
-        public async Task<IActionResult> Get(string? teamname = null)
+        public async Task<IActionResult> Get(int? teamid = null)
         {
-            string query = "SELECT * FROM players ORDER BY player_name";
-            if (teamname != null)
+            string query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id ORDER BY player_id";
+            if (teamid != null)
             {
-                query = "SELECT player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players natural join teams WHERE team_name = :teamname ORDER BY player_name";
-                var parameters = new Dictionary<string, object> { { "teamname", teamname } };
+                query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id WHERE players.team_id = :teamid ORDER BY player_id";
+                var parameters = new Dictionary<string, object> { { "teamid", teamid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
@@ -40,7 +40,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")] // GET /v1/player/displayone?playerid=*
         public async Task<IActionResult> Get(int playerid)
         {
-            string query = "SELECT * FROM players WHERE player_id = :Playerid";
+            string query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id WHERE player_id = :Playerid";
             var parameters = new Dictionary<string, object> { { "Playerid", playerid } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -51,11 +51,11 @@ namespace FootballManagerBackend.Controllers
         public async Task<IActionResult> Add([FromBody] JsonElement playerElement)
         {
             string query = @"
-        INSERT INTO players 
-        (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) 
-        VALUES 
-        (PLAYER_SEQ.NEXTVAL, :player_name, :birthday, :team_id, :role, :used_foot, :health_state, :rank, :game_state, :trans_state, :is_show) 
-        RETURNING player_id INTO :new_id";
+            INSERT INTO players 
+            (player_id, player_name, birthday, team_id, role, used_foot, health_state, rank, game_state, trans_state, is_show) 
+            VALUES 
+            (PLAYER_SEQ.NEXTVAL, :player_name, :birthday, :team_id, :role, :used_foot, :health_state, :rank, :game_state, :trans_state, :is_show) 
+            RETURNING player_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
             var outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
