@@ -68,7 +68,7 @@ namespace FootballManagerBackend.Controllers
             (LINEUP_SEQ.NEXTVAL, :lineup_id, :note, :team_id, :match_id, 
              :player1_id, :player2_id, :player3_id, :player4_id, :player5_id, :player6_id, 
              :player7_id, :player8_id, :player9_id, :player10_id, :player11_id) 
-            RETURNING player_id INTO :new_id";
+            RETURNING lineup_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
             var outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
