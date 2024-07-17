@@ -219,7 +219,7 @@ namespace FootballManagerBackend.Controllers
 
             queryBuilder.Length -= 2;
             queryBuilder.Append(" WHERE lineup_id = :lineupid");
-            parameters.Add("lineup_id", lineupid);
+            parameters.Add("lineupid", lineupid);
             string query = queryBuilder.ToString();
             Console.WriteLine($"Generated Query: {query}");
 
