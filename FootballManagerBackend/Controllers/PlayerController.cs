@@ -113,9 +113,9 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("update")] // POST /v1/player/update?playerid=* + JSON
-        public async Task<IActionResult> Update(int playerid, [FromBody] JsonElement teamElement)
+        public async Task<IActionResult> Update(int playerid, [FromBody] JsonElement playerElement)
         {
-            if (!teamElement.EnumerateObject().Any())
+            if (!playerElement.EnumerateObject().Any())
             {
                 return BadRequest("No fields provided for update.");
             }
@@ -123,7 +123,7 @@ namespace FootballManagerBackend.Controllers
             var queryBuilder = new System.Text.StringBuilder("UPDATE players SET ");
             var parameters = new Dictionary<string, object>();
 
-            foreach (var property in teamElement.EnumerateObject())
+            foreach (var property in playerElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
@@ -193,7 +193,6 @@ namespace FootballManagerBackend.Controllers
                 }
             }
 
-            // 移除最后一个逗号和空格
             queryBuilder.Length -= 2;
             queryBuilder.Append(" WHERE player_id = :playerid");
             parameters.Add("player_id", playerid);
