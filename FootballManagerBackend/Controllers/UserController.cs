@@ -28,12 +28,12 @@ namespace FootballManagerBackend.Controllers
             _configuration = configuration;
         }
 
-        //GET v1/user/getInformation/{user_id}
-        [HttpGet("getInformation/{user_id}")]
-        public async Task<IActionResult> Get(string user_id)
+        // GET /v1/user/displayone?userId=*
+        [HttpGet("displayone")]
+        public async Task<IActionResult> Get(int userId)
         {
             string query = "SELECT * FROM users WHERE user_id = :id";
-            var parameters = new Dictionary<string, object> { { "id", user_id } };
+            var parameters = new Dictionary<string, object> { { "id", userId } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
@@ -71,11 +71,29 @@ namespace FootballManagerBackend.Controllers
 
                     user.UserId = newUserId;
 
-                    return CreatedAtAction(nameof(PostUserAdd), new { id = newUserId }, user);
+                    // 创建响应对象
+                    var response = new
+                    {
+                        code = 200,
+                        msg = "注册成功",
+                        user_id = newUserId,
+                        user_name = user.UserName,
+                        user_right = user.UserRight,
+                        user_password = user.UserPassword,
+                        user_phone = user.UserPhone,
+                        icon = user.Icon
+                    };
+
+                    return CreatedAtAction(nameof(PostUserAdd), new { id = newUserId }, response);
                 }
                 else
                 {
-                    return BadRequest("Failed to insert user.");
+                    var bad_response = new
+                    {
+                        code = 500,
+                        msg = "注册失败",
+                    };
+                    return BadRequest(bad_response);
                 }
             }
             catch (Exception ex)
@@ -158,15 +176,30 @@ namespace FootballManagerBackend.Controllers
                         // 检查是否成功更新密码并返回相应的结果
                         if (rowsUpdated > 0)
                         {
-                            return Ok("Password changed successfully");
+                            var good_response = new
+                            {
+                                code = 200,
+                                msg = "密码修改成功",
+                            };
+                            return Ok(good_response);
                         }
                         else
                         {
-                            return StatusCode(500, "Failed to update password");
+                            var good_response = new
+                            {
+                                code = 300,
+                                msg = "密码修改失败，请重试",
+                            };
+                            return Ok(good_response);
                         }
                     }
                 }
-                return BadRequest("Authentication failed");
+                var bad_response = new
+                {
+                    code = 500,
+                    msg = "密码错误，修改失败",
+                };
+                return BadRequest(bad_response);
             }
             catch (Exception ex)
             {
@@ -197,11 +230,21 @@ namespace FootballManagerBackend.Controllers
                 // 检查更新是否成功并返回相应结果
                 if (rowsUpdated > 0)
                 {
-                    return Ok("User attributes updated successfully");
+                    var good_response = new
+                    {
+                        code = 200,
+                        msg = "修改成功",
+                    };
+                    return Ok(good_response);
                 }
                 else
                 {
-                    return NotFound("User not found or no changes made.");
+                    var good_response = new
+                    {
+                        code = 300,
+                        msg = "用户不存在或无修改发生",
+                    };
+                    return NotFound(good_response);
                 }
             }
             catch (Exception ex)
