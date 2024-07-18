@@ -19,40 +19,39 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/medical/displayall
-        public async Task<IActionResult> GetAll()
+        [HttpGet("displayall")] // GET /v1/medical/displayall or GET /v1/medical/displayall?teamid=* or GET /v1/medical/displayall?playerid=*
+        public async Task<IActionResult> GetAll(int? teamid = null, int? playerid = null)
         {
-            string query = @"SELECT medical_id, player_id, team_id, team_name, hurt_part, hurt_time, medical_care, state
-                FROM medicals natural join players natural join teams";
-
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
-            return Ok(result);
-        }
-
-        [HttpGet("display1team")] // GET /v1/medical/display1team?teamid=*
-        public async Task<IActionResult> GetATeam(int teamid)
-        {
-            string query = @"SELECT medical_id, player_id, team_id, team_name, hurt_part, hurt_time, medical_care, state
-                FROM medicals natural join players natural join teams WHERE team_id = :teamid";
-            var parameters = new Dictionary<string, object> { { "teamid", teamid } };
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
-            return Ok(result);
-        }
-
-        [HttpGet("display1player")] // GET /v1/medical/display1player?playerid=*
-        public async Task<IActionResult> GetAPlayer(int playerid)
-        {
-            string query = @"SELECT medical_id, player_id, team_id, team_name, hurt_part, hurt_time, medical_care, state
+            string query;
+            if (playerid != null)
+            {
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
                 FROM medicals natural join players natural join teams WHERE player_id = :playerid";
-            var parameters = new Dictionary<string, object> { { "playerid", playerid } };
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
-            return Ok(result);
+                var parameters = new Dictionary<string, object> { { "playerid", playerid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else if (teamid != null)
+            {
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+                FROM medicals natural join players natural join teams WHERE team_id = :teamid";
+                var parameters = new Dictionary<string, object> { { "teamid", teamid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else
+            {
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+                FROM medicals natural join players natural join teams";
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+                return Ok(result);
+            }
         }
 
         [HttpGet("displayone")] // GET /v1/medical/displayone?medicalid=*
         public async Task<IActionResult> GetOne(int medicalid)
         {
-            string query = @"SELECT medical_id, player_id, team_id, team_name, hurt_part, hurt_time, medical_care, state
+            string query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
                 FROM medicals natural join players natural join teams WHERE medical_id = :medicalid";
             var parameters = new Dictionary<string, object> { { "medicalid", medicalid } };
 
