@@ -19,8 +19,8 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/medical/displayall or GET /v1/medical/displayall?teamid=* or GET /v1/medical/displayall?playerid=*
-        public async Task<IActionResult> GetAll(int? teamid = null, int? playerid = null)
+        [HttpGet("displayall")] // GET /v1/medical/displayall or GET /v1/medical/displayall?teamid=* or GET /v1/medical/displayall?playerid=* or GET /v1/medical/displayall?lineupid=*
+        public async Task<IActionResult> GetAll(int? teamid = null, int? playerid = null, int? lineupid = null)
         {
             string query;
             if (playerid != null)
@@ -28,6 +28,19 @@ namespace FootballManagerBackend.Controllers
                 query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
                 FROM medicals natural join players natural join teams WHERE player_id = :playerid";
                 var parameters = new Dictionary<string, object> { { "playerid", playerid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else if (lineupid != null)
+            {
+                query = @"SELECT medical_id, player_id, player_name, lineups.team_id AS team_id, team_name, hurt_part, hurt_time, medical_care, state
+                FROM medicals natural join players natural join teams, lineups 
+                WHERE lineup_id = :lineupid AND 
+                (player_id = player1_id OR player_id = player2_id OR player_id = player3_id OR 
+                player_id = player4_id OR player_id = player5_id OR player_id = player6_id OR 
+                player_id = player7_id OR player_id = player8_id OR player_id = player9_id OR
+                player_id = player10_id OR player_id = player11_id)";
+                var parameters = new Dictionary<string, object> { { "lineupid", lineupid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
