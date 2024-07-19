@@ -19,14 +19,27 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamid=*
-        public async Task<IActionResult> Get(int? teamid = null)
+        [HttpGet("displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?teamid=* or GET /v1/player/displayall?lineupid=*
+        public async Task<IActionResult> Get(int? teamid = null, int? lineupid = null)
         {
             string query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id ORDER BY player_id";
             if (teamid != null)
             {
                 query = "SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show FROM players left outer join teams ON players.team_id = teams.team_id WHERE players.team_id = :teamid ORDER BY player_id";
                 var parameters = new Dictionary<string, object> { { "teamid", teamid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else if (lineupid != null)
+            {
+                query = @"SELECT player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, players.team_id AS team_id, team_name, role, used_foot, health_state, rank, game_state, trans_state, is_show 
+                FROM players left outer join teams ON players.team_id = teams.team_id, lineups 
+                WHERE lineup_id = :lineupid AND 
+                (player_id = player1_id OR player_id = player2_id OR player_id = player3_id OR 
+                player_id = player4_id OR player_id = player5_id OR player_id = player6_id OR 
+                player_id = player7_id OR player_id = player8_id OR player_id = player9_id OR
+                player_id = player10_id OR player_id = player11_id) ORDER BY player_id";
+                var parameters = new Dictionary<string, object> { { "lineupid", lineupid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
