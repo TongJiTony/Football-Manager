@@ -22,13 +22,13 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayall")] // GET /v1/lineup/displayall or GET /v1/lineup/displayall?teamid=*
         public async Task<IActionResult> Get(int? teamid = null)
         {
-            string query = @"SELECT lineup_id, note, team_id, team_name, match_id, 
+            string query = @"SELECT lineup_id, note, team_id, team_name, 
                 player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
                 player7_id, player8_id, player9_id, player10_id, player11_id 
                 FROM lineups natural join teams ORDER BY lineup_id";
             if (teamid != null)
             {
-                query = @"SELECT lineup_id, note, team_id, team_name, match_id, 
+                query = @"SELECT lineup_id, note, team_id, team_name, 
                 player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
                 player7_id, player8_id, player9_id, player10_id, player11_id 
                 FROM lineups natural join teams WHERE team_id = :teamid ORDER BY lineup_id";
@@ -46,7 +46,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")] // GET /v1/lineup/displayone?lineupid=*
         public async Task<IActionResult> Get(int lineupid)
         {
-            string query = @"SELECT lineup_id, note, team_id, team_name, match_id, 
+            string query = @"SELECT lineup_id, note, team_id, team_name, 
                 player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
                 player7_id, player8_id, player9_id, player10_id, player11_id 
                 FROM lineups natural join teams WHERE lineup_id = :Lineupid";
@@ -61,11 +61,11 @@ namespace FootballManagerBackend.Controllers
         {
             string query = @"
             INSERT INTO lineups 
-            (lineup_id, note, team_id, match_id, 
+            (lineup_id, note, team_id, 
              player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
              player7_id, player8_id, player9_id, player10_id, player11_id) 
             VALUES 
-            (LINEUP_SEQ.NEXTVAL, :note, :team_id, :match_id, 
+            (LINEUP_SEQ.NEXTVAL, :note, :team_id, 
              :player1_id, :player2_id, :player3_id, :player4_id, :player5_id, :player6_id, 
              :player7_id, :player8_id, :player9_id, :player10_id, :player11_id) 
             RETURNING lineup_id INTO :new_id";
@@ -85,9 +85,6 @@ namespace FootballManagerBackend.Controllers
                         break;
                     case "team_id":
                         parameters.Add("team_id", property.Value.GetInt32());
-                        break;
-                    case "match_id":
-                        parameters.Add("match_id", property.Value.GetInt32());
                         break;
                     case "player1_id":
                         parameters.Add("player1_id", property.Value.GetInt32());
