@@ -77,9 +77,6 @@ namespace FootballManagerBackend.Controllers
             {
                 switch (property.Name.ToLower())
                 {
-                    case "lineup_id":
-                        parameters.Add("lineup_id", property.Value.GetInt32());
-                        break;
                     case "note":
                         parameters.Add("note", property.Value.GetString());
                         break;
