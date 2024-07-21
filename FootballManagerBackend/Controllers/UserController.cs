@@ -29,7 +29,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         // GET /v1/user/displayall
-        [HttpGet("displayall")]
+        [HttpGet("admin/displayall")]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string key = "")
         {
             int startRow = (page - 1) * limit + 1;
