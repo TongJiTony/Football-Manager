@@ -28,6 +28,52 @@ namespace FootballManagerBackend.Controllers
             _configuration = configuration;
         }
 
+        // GET /v1/user/displayall
+        [HttpGet("admin/displayall")]
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string key = "")
+        {
+            int startRow = (page - 1) * limit + 1;
+            int endRow = page * limit;
+
+            string query = @"
+            SELECT * FROM (
+                SELECT 
+                    u.user_id, 
+                    u.user_name, 
+                    u.user_right, 
+                    u.user_password, 
+                    u.user_phone, 
+                    u.icon,
+                    ROW_NUMBER() OVER (ORDER BY u.user_id) AS rnum
+                FROM 
+                    users u
+                WHERE 
+                    u.user_name LIKE '%' || :key || '%' 
+                    OR u.user_phone LIKE '%' || :key2 || '%'
+            ) 
+            WHERE rnum BETWEEN :startRow AND :endRow";
+
+            string countQuery = @"
+    SELECT COUNT(*) AS total_count
+    FROM users u
+    WHERE  u.user_name LIKE '%' || :key || '%' 
+                    OR u.user_phone LIKE '%' || :key2 || '%'";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "key", key },
+                { "key2", key },
+                { "startRow", startRow },
+                { "endRow", endRow }
+            };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            List<Dictionary<string, object>> countResult = await _context.ExecuteQueryAsync(countQuery, new Dictionary<string, object> { { "key", key }, { "key2", key }});
+            int totalCount = Convert.ToInt32(countResult[0]["TOTAL_COUNT"]);
+
+            return Ok(new { data = result, total = totalCount });
+        }
+
         // GET /v1/user/displayone?userId=*
         [HttpGet("displayone")]
         public async Task<IActionResult> Get(int userId)
