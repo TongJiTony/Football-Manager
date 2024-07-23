@@ -50,6 +50,53 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
+        [HttpGet("admin/displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?page=*&limit=*&key=*
+        public async Task<IActionResult> Get(int page = 1, int limit = 10, string key = "")
+        {
+            int startRow = (page - 1) * limit + 1;
+            int endRow = page * limit;
+
+            string query = @"
+            SELECT * FROM (
+                SELECT 
+                    ROW_NUMBER() OVER (ORDER BY player_id) AS rnum,
+                    player_id, player_name, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, 
+                    players.team_id AS team_id, team_name, role, used_foot, health_state, 
+                    rank, game_state, trans_state, is_show 
+                FROM players 
+                LEFT OUTER JOIN teams ON players.team_id = teams.team_id 
+                WHERE players.player_name LIKE '%' || :key1 || '%' 
+                   OR players.role LIKE '%' || :key2 || '%' 
+                   OR teams.team_name LIKE '%' || :key3 || '%' 
+            ) 
+            WHERE rnum BETWEEN :startRow AND :endRow
+            ORDER BY rnum";
+
+            string countQuery = @"
+            SELECT COUNT(*) AS total_count
+            FROM players 
+            LEFT OUTER JOIN teams ON players.team_id = teams.team_id 
+            WHERE players.player_name LIKE '%' || :key1 || '%' 
+               OR players.role LIKE '%' || :key2 || '%' 
+               OR teams.team_name LIKE '%' || :key3 || '%'";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "key1", key },
+                { "key2", key },
+                { "key3", key },
+                { "startRow", startRow },
+                { "endRow", endRow }
+            };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            List<Dictionary<string, object>> countResult = await _context.ExecuteQueryAsync(countQuery, new Dictionary<string, object> { { "key1", key },{ "key2", key },{ "key3", key }});
+            int totalCount = Convert.ToInt32(countResult[0]["TOTAL_COUNT"]);
+
+            return Ok(new { data = result, total = totalCount });
+        }
+
+
         [HttpGet("displayone")] // GET /v1/player/displayone?playerid=*
         public async Task<IActionResult> Get(int playerid)
         {
@@ -239,6 +286,44 @@ namespace FootballManagerBackend.Controllers
             {
                 Console.WriteLine($"Error executing DELETE request: {ex.Message}");
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpDelete("admin/delete")]
+        public async Task<IActionResult> DeleteByIds([FromBody] int[] Playerids)
+        {
+            string query = "DELETE FROM players WHERE team_id = :id";
+            try
+            {
+                int totalDeleted = 0;
+
+                foreach (var Playerid in Playerids)
+                {
+                    var parameters = new Dictionary<string, object>
+                    {
+                        { "id", Playerid }
+                    };
+
+                    int result = await _context.ExecuteNonQueryAsync(query, parameters);
+
+                    if (result > 0)
+                    {
+                        totalDeleted++;
+                    }
+                }
+
+                if (totalDeleted > 0)
+                {
+                    return Ok(new { code=200,message = " Playerids deleted successfully", deletedCount = totalDeleted });
+                }
+                else
+                {
+                    return NotFound(new { message = "No  Playerids found for deletion" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
             }
         }
     }
