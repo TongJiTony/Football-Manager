@@ -25,7 +25,8 @@ namespace FootballManagerBackend.Controllers
         SELECT 
             m.match_id, 
             TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date, 
-            s.stadium_name AS match_stadium, 
+            s.stadium_id AS match_stadium,
+            s.stadium_name AS match_stadium_name, 
             ht.team_name AS home_team_name, 
             at.team_name AS away_team_name, 
             m.home_team_score, 
@@ -58,8 +59,9 @@ namespace FootballManagerBackend.Controllers
             var queryBuilder = new System.Text.StringBuilder(@"
         SELECT 
             m.match_id, 
-            TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date, 
-            s.stadium_name AS match_stadium, 
+            TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date,
+            s.stadium_id AS match_stadium,
+            s.stadium_name AS match_stadium_name, 
             ht.team_name AS home_team_name, 
             at.team_name AS away_team_name, 
             m.home_team_score, 
