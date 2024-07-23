@@ -18,6 +18,69 @@ namespace FootballManagerBackend.Controllers
         {
             _context = context;
         }
+
+        // GET /v1/team//admin/displayall
+        [HttpGet("admin/displayall")]
+        public async Task<IActionResult> GetAllTeams([FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string key = "")
+        {
+            try
+            {
+                int startRow = (page - 1) * limit + 1;
+                int endRow = page * limit;
+
+                string query = @"
+        SELECT * FROM (
+            SELECT 
+                t.team_id, 
+                t.team_name, 
+                TO_CHAR(t.established_date,'YYYY-MM-DD') AS established_date, 
+                t.head_coach, 
+                t.city,
+                ROW_NUMBER() OVER (ORDER BY t.team_name) AS rnum
+            FROM 
+                teams t
+            WHERE 
+                t.team_name LIKE '%' || :key || '%' 
+                OR t.city LIKE '%' || :key2 || '%'
+        ) 
+        WHERE rnum BETWEEN :startRow AND :endRow";
+
+                string countQuery = @"
+        SELECT COUNT(*) AS total_count
+        FROM teams t
+        WHERE 
+            t.team_name LIKE '%' || :key || '%' 
+            OR t.city LIKE '%' || :key2 || '%'";
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "key", key },
+                    { "key2", key },
+                    { "startRow", startRow },
+                    { "endRow", endRow }
+                };
+
+                // Execute main query
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+
+                // Execute count query
+                var countParameters = new Dictionary<string, object>
+                {
+                    { "key", key },
+                    { "key2", key }
+                };
+                List<Dictionary<string, object>> countResult = await _context.ExecuteQueryAsync(countQuery, countParameters);
+                int totalCount = Convert.ToInt32(countResult[0]["TOTAL_COUNT"]);
+
+                return Ok(new { data = result, total = totalCount });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
         // GET /v1/team/displayall or GET /v1/team/displayall?teamid=*
         [HttpGet("displayall")]
         public async Task<IActionResult> Get()
@@ -105,6 +168,45 @@ namespace FootballManagerBackend.Controllers
                 else
                 {
                     return NotFound(new { message = "Team not found", Teamid = Teamid });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("admin/delete")]
+        public async Task<IActionResult> DeleteByIds([FromBody] int[] Teamids)
+        {
+            string query = "DELETE FROM teams WHERE team_id = :id";
+
+            try
+            {
+                int totalDeleted = 0;
+
+                foreach (var Teamid in Teamids)
+                {
+                    var parameters = new Dictionary<string, object>
+                    {
+                        { "id", Teamid }
+                    };
+
+                    int result = await _context.ExecuteNonQueryAsync(query, parameters);
+
+                    if (result > 0)
+                    {
+                        totalDeleted++;
+                    }
+                }
+
+                if (totalDeleted > 0)
+                {
+                    return Ok(new { message = "Teams deleted successfully", deletedCount = totalDeleted });
+                }
+                else
+                {
+                    return NotFound(new { message = "No teams found for deletion" });
                 }
             }
             catch (Exception ex)
@@ -210,10 +312,10 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
+    
+       
 
-
-
-
+       
 
 
 

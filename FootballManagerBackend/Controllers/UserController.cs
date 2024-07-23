@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +27,52 @@ namespace FootballManagerBackend.Controllers
         {
             _context = context;
             _configuration = configuration;
+        }
+
+        // GET /v1/user/displayall
+        [HttpGet("admin/displayall")]
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string key = "")
+        {
+            int startRow = (page - 1) * limit + 1;
+            int endRow = page * limit;
+
+            string query = @"
+            SELECT * FROM (
+                SELECT 
+                    u.user_id, 
+                    u.user_name, 
+                    u.user_right, 
+                    u.user_password, 
+                    u.user_phone, 
+                    u.icon,
+                    ROW_NUMBER() OVER (ORDER BY u.user_id) AS rnum
+                FROM 
+                    users u
+                WHERE 
+                    u.user_name LIKE '%' || :key || '%' 
+                    OR u.user_phone LIKE '%' || :key2 || '%'
+            ) 
+            WHERE rnum BETWEEN :startRow AND :endRow";
+
+            string countQuery = @"
+    SELECT COUNT(*) AS total_count
+    FROM users u
+    WHERE  u.user_name LIKE '%' || :key || '%' 
+                    OR u.user_phone LIKE '%' || :key2 || '%'";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "key", key },
+                { "key2", key },
+                { "startRow", startRow },
+                { "endRow", endRow }
+            };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            List<Dictionary<string, object>> countResult = await _context.ExecuteQueryAsync(countQuery, new Dictionary<string, object> { { "key", key }, { "key2", key }});
+            int totalCount = Convert.ToInt32(countResult[0]["TOTAL_COUNT"]);
+
+            return Ok(new { data = result, total = totalCount });
         }
 
         // GET /v1/user/displayone?userId=*
@@ -253,6 +300,54 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
+        // POST v1/user/admin/changeAttributes
+        [HttpPost("admin/changeAttributes")]
+        public async Task<IActionResult> PostChangeAll([FromBody] User user)
+        {
+            try
+            {
+                // 构建更新 SQL 查询和参数
+                string updateQuery = "UPDATE users SET user_name = :newName,  user_phone = :newPhone, icon = :newIcon , user_right = :newRight , user_password = :newPwd WHERE user_id = :id";
+
+                var updateParameters = new Dictionary<string, object>
+                {
+                    { "newName", user.UserName },
+                    { "newPhone", user.UserPhone },
+                    { "newIcon", user.Icon },
+                    { "newRight", user.UserRight},
+                    {"newPwd", user.UserPassword },
+                    { "id", user.UserId }
+                };
+
+                // 执行更新操作
+                int rowsUpdated = await _context.ExecuteNonQueryAsync(updateQuery, updateParameters);
+
+                // 检查更新是否成功并返回相应结果
+                if (rowsUpdated > 0)
+                {
+                    var good_response = new
+                    {
+                        code = 200,
+                        msg = "修改成功",
+                    };
+                    return Ok(good_response);
+                }
+                else
+                {
+                    var good_response = new
+                    {
+                        code = 300,
+                        msg = "用户不存在或无修改发生",
+                    };
+                    return NotFound(good_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         // DELETE v1/user/delete
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteUser([FromBody] DeleteRequest DeleteReq)
@@ -287,6 +382,49 @@ namespace FootballManagerBackend.Controllers
                     return Unauthorized("Invalid password.");
                 }
                 return NotFound("User not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE v1/user/admin/delete
+        [HttpDelete("admin/delete")]
+        public async Task<IActionResult> DeleteUsers([FromBody] int[] deleteIds)
+        {
+            try
+            {
+                foreach (var deleteId in deleteIds)
+                {
+                    
+                    string query = "SELECT user_password FROM users WHERE user_id = :id";
+                    var parameters = new Dictionary<string, object> { { "id", deleteId } };
+
+                    List<Dictionary<string, object>> rawResult = await _context.ExecuteQueryAsync(query, parameters);
+                    List<Dictionary<string, string>> result = rawResult.Select(d => d.ToDictionary(kv => kv.Key, kv => kv.Value.ToString())).ToList();
+
+                    if (result != null && result.Count == 1)
+                    {
+                       
+                            // 删除用户记录
+                            string deleteQuery = "DELETE FROM users WHERE user_id = :id";
+                            var deleteParameters = new Dictionary<string, object> { { "id", deleteId} };
+                            int rowsDeleted = await _context.ExecuteNonQueryAsync(deleteQuery, deleteParameters);
+
+                            if (rowsDeleted == 0)
+                            {
+                                return NotFound($"User with id {deleteId} not found.");
+                            }
+                       
+                    }
+                    else
+                    {
+                        return NotFound($"User with id {deleteId} not found.");
+                    }
+                }
+
+                return Ok(new { code = 200});
             }
             catch (Exception ex)
             {
