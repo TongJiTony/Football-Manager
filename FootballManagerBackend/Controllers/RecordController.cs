@@ -20,9 +20,9 @@ namespace FootballManagerBackend.Controllers
             _configuration = configuration;
         }
 
-        //GET v1/user/getInformation/{record_id}
-        [HttpGet("getInformation/{record_id}")]
-        public async Task<IActionResult> Get(string record_id)
+        //GET v1/record/getbyRecord/{record_id}
+        [HttpGet("getbyRecord/{record_id}")]
+        public async Task<IActionResult> GetbyRecord(string record_id)
         {
             string query = "SELECT * FROM records WHERE record_id = :id";
             var parameters = new Dictionary<string, object> { { "id", record_id } };
@@ -31,32 +31,43 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
+        //GET v1/record/getbyTeam/{team_id}
+        [HttpGet("getbyTeam/{team_id}")]
+        public async Task<IActionResult> GetbyTeam(string team_id)
+        {
+            string query = "SELECT * FROM records WHERE team_id = :id";
+            var parameters = new Dictionary<string, object> { { "id", team_id } };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            return Ok(result);
+        }
+
         // POST v1/record/add
         //ID从1000000000开始每次分配自动加一，其余信息由用户输入
         [HttpPost("add")]
-        public async Task<IActionResult> PostRecordAdd(Record record)
+        public async Task<IActionResult> PostRecordAdd([FromBody] Record record)
         {
             try
             {
                 string query = @"
-                INSERT INTO records (record_id, team_id, transaction_date, amount, description)
-                VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)
-                RETURNING record_id INTO :new_record_id";
+            INSERT INTO records (record_id, team_id, transaction_date, amount, description)
+            VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)
+            RETURNING record_id INTO :new_record_id";
 
                 var parameters = new List<OracleParameter>
-                {
-                    new OracleParameter(":team_id", record.team_id),
-                    new OracleParameter(":transaction_date", record.transaction_date),
-                    new OracleParameter(":amount", record.amount),
-                    new OracleParameter(":description", record.description),
-                    new OracleParameter(":new_record_id", OracleDbType.Decimal, ParameterDirection.Output)
-                };
+        {
+            new OracleParameter(":team_id", OracleDbType.Varchar2, record.team_id, ParameterDirection.Input),
+            new OracleParameter(":transaction_date", OracleDbType.Date, record.transaction_date, ParameterDirection.Input),
+            new OracleParameter(":amount", OracleDbType.Decimal, record.amount, ParameterDirection.Input),
+            new OracleParameter(":description", OracleDbType.Varchar2, record.description, ParameterDirection.Input),
+            new OracleParameter(":new_record_id", OracleDbType.Decimal, ParameterDirection.Output)
+        };
 
                 var result = await _context.ExecuteQueryWithParametersAsync(query, parameters);
 
-                if (parameters[5].Value != DBNull.Value)
+                if (parameters[4].Value != DBNull.Value)
                 {
-                    var oracleDecimal = (OracleDecimal)parameters[5].Value;
+                    var oracleDecimal = (OracleDecimal)parameters[4].Value;
                     int newRecord_id = oracleDecimal.ToInt32();
 
                     record.record_id = newRecord_id;
@@ -65,12 +76,12 @@ namespace FootballManagerBackend.Controllers
                 }
                 else
                 {
-                    return BadRequest("Failed to insert record.");
+                    return BadRequest("插入记录失败。");
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"内部服务器错误: {ex.Message}");
             }
         }
 
