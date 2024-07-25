@@ -12,6 +12,8 @@ namespace FootballManagerBackend.Controllers
     [Route("v1/medical")]
     public class MedicalController : ControllerBase
     {
+        //类似playerlist开发模式，做成列表形式，具有返回上级功能，添加功能，删除功能，修改功能，
+        //查询功能，增改删采用弹窗的方式完成
         private readonly OracleDbContext _context;
 
         public MedicalController(OracleDbContext context)
