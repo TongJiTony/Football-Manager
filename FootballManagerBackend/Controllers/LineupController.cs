@@ -232,7 +232,7 @@ namespace FootballManagerBackend.Controllers
         [HttpDelete("delete")] // DELETE /v1/lineup/delete?lineupid=*
         public async Task<IActionResult> Delete(int lineupid)
         {
-            string query = "DELETE FROM lineups WHERE lineupid = :lineupid";
+            string query = "DELETE FROM lineups WHERE lineup_id = :lineupid";
             var parameters = new Dictionary<string, object> { { "lineupid", lineupid } };
 
             try
