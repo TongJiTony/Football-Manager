@@ -86,6 +86,17 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
+        // GET /v1/user/getDeleteImage?userId=*
+        [HttpGet("getDeleteImage")]
+        public async Task<IActionResult> GetDeleteImage(int userId)
+        {
+            string query = "SELECT delete_icon FROM users WHERE user_id = :id";
+            var parameters = new Dictionary<string, object> { { "id", userId } };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            return Ok(result);
+        }
+
         // POST v1/user/add
         //添加新用户，用户ID从1000000000开始每次分配自动加一，其余信息由用户输入
         //其余信息可能需要合法性检验
@@ -425,6 +436,52 @@ namespace FootballManagerBackend.Controllers
                 }
 
                 return Ok(new { code = 200});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        //POST v1/user/saveImage
+        [HttpPost("saveImage")]
+        public async Task<IActionResult> PostSaveImage([FromBody] ChangeImageRequest ChangeImageRequest)
+        {
+            try
+            {
+                // 构建更新 SQL 查询和参数
+                string updateQuery = "UPDATE users SET icon = :icon,  delete_icon = :delete_icon WHERE user_id = :id";
+
+                var updateParameters = new Dictionary<string, object>
+                {
+                    { "icon", ChangeImageRequest.icon },
+                    { "delete_icon", ChangeImageRequest.delete_icon },
+                    { "id", ChangeImageRequest.user_id }
+                };
+
+                // 执行更新操作
+                int rowsUpdated = await _context.ExecuteNonQueryAsync(updateQuery, updateParameters);
+
+                // 检查更新是否成功并返回相应结果
+                if (rowsUpdated > 0)
+                {
+                    var good_response = new
+                    {
+                        code = 200,
+                        msg = "添加成功",
+                    };
+                    return Ok(good_response);
+                }
+                else
+                {
+                    var good_response = new
+                    {
+                        code = 300,
+                        msg = "用户不存在或添加失败",
+                    };
+                    return NotFound(good_response);
+                }
             }
             catch (Exception ex)
             {
