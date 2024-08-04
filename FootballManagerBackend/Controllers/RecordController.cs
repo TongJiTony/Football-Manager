@@ -20,9 +20,9 @@ namespace FootballManagerBackend.Controllers
             _configuration = configuration;
         }
 
-        //GET v1/record/getbyRecord/{record_id}
-        [HttpGet("getbyRecord/{record_id}")]
-        public async Task<IActionResult> GetbyRecord(string record_id)
+        //GET v1/record/displayone?record_id=*
+        [HttpGet("displayone")]
+        public async Task<IActionResult> Get(string record_id)
         {
             string query = "SELECT * FROM records WHERE record_id = :id";
             var parameters = new Dictionary<string, object> { { "id", record_id } };
@@ -31,15 +31,22 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
-        //GET v1/record/getbyTeam/{team_id}
-        [HttpGet("getbyTeam/{team_id}")]
-        public async Task<IActionResult> GetbyTeam(string team_id)
+        //GET v1/record/displayall
+        [HttpGet("displayall")]
+        public async Task<IActionResult> Get(int? team_id = null)
         {
-            string query = "SELECT * FROM records WHERE team_id = :id";
-            var parameters = new Dictionary<string, object> { { "id", team_id } };
-
-            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
-            return Ok(result);
+            string query = "SELECT * FROM records";
+            if (team_id != null){
+                query = "SELECT * FROM records WHERE team_id = :id";
+                var parameters = new Dictionary<string, object> { { "id", team_id } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else
+            {
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
+                return Ok(result);
+            }
         }
 
         // POST v1/record/add
@@ -85,22 +92,23 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
-        // POST api/<RecordController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // DELETE v1/record/delete?record_id=*
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteRecord(long record_id)
         {
+            try
+            {
+                string query = "DELETE FROM records WHERE record_id = :record_id";
+                var parameters = new Dictionary<string, object> { { "record_id", record_id } };
+                await _context.ExecuteNonQueryAsync(query, parameters);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing DELETE request: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        // PUT api/<RecordController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<RecordController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
