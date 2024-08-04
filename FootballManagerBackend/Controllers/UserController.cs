@@ -86,6 +86,17 @@ namespace FootballManagerBackend.Controllers
             return Ok(result);
         }
 
+        // GET /v1/user/getDeleteImage?userId=*
+        [HttpGet("getDeleteImage")]
+        public async Task<IActionResult> GetDeleteImage(int userId)
+        {
+            string query = "SELECT delete_icon FROM users WHERE user_id = :id";
+            var parameters = new Dictionary<string, object> { { "id", userId } };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            return Ok(result);
+        }
+
         // POST v1/user/add
         //添加新用户，用户ID从1000000000开始每次分配自动加一，其余信息由用户输入
         //其余信息可能需要合法性检验
@@ -178,14 +189,20 @@ namespace FootballManagerBackend.Controllers
                             token = token
                         };
                         return Ok(good_response);
-                    } 
+                    }
+                    var bad_response2 = new
+                    {
+                        code = 400,
+                        msg = "密码错误，请重新输入",
+                    };
+                    return BadRequest(bad_response2);
                 }
-                var bad_response = new
+                var bad_response1 = new
                 {
-                    code = 500,
-                    msg = "密码错误，登录失败",
+                    code = 401,
+                    msg = "该用户不存在",
                 };
-                return BadRequest(bad_response);
+                return BadRequest(bad_response1);
             }
             catch (Exception ex)
             {
@@ -433,6 +450,96 @@ namespace FootballManagerBackend.Controllers
         }
 
 
+        //POST v1/user/saveImage
+        [HttpPost("saveImage")]
+        public async Task<IActionResult> PostSaveImage([FromBody] ChangeImageRequest ChangeImageRequest)
+        {
+            try
+            {
+                // 构建更新 SQL 查询和参数
+                string updateQuery = "UPDATE users SET icon = :icon,  delete_icon = :delete_icon WHERE user_id = :id";
+
+                var updateParameters = new Dictionary<string, object>
+                {
+                    { "icon", ChangeImageRequest.icon },
+                    { "delete_icon", ChangeImageRequest.delete_icon },
+                    { "id", ChangeImageRequest.user_id }
+                };
+
+                // 执行更新操作
+                int rowsUpdated = await _context.ExecuteNonQueryAsync(updateQuery, updateParameters);
+
+                // 检查更新是否成功并返回相应结果
+                if (rowsUpdated > 0)
+                {
+                    var good_response = new
+                    {
+                        code = 200,
+                        msg = "添加成功",
+                    };
+                    return Ok(good_response);
+                }
+                else
+                {
+                    var good_response = new
+                    {
+                        code = 300,
+                        msg = "用户不存在或添加失败",
+                    };
+                    return NotFound(good_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        // DELETE /v1/user/deleteImage
+        [HttpDelete("deleteImage")]
+        public async Task<IActionResult> DeleteImage([FromQuery] string delete_url)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(delete_url))
+                {
+                    return BadRequest("Delete URL cannot be null or empty.");
+                }
+
+                // 使用 HttpClient 发送删除请求到图床服务
+                using (var client = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Delete, delete_url);
+
+                    // 发送请求
+                    var response = await client.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // 返回成功响应
+                        return Ok(new
+                        {
+                            code = 200,
+                            msg = "Image deleted successfully from the image hosting service."
+                        });
+                    }
+                    else
+                    {
+                        // 返回失败响应
+                        return StatusCode((int)response.StatusCode, new
+                        {
+                            code = (int)response.StatusCode,
+                            msg = "Failed to delete image from the image hosting service."
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
         private string GenerateToken(string userId, string userName, string userRight)
         {
