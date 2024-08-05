@@ -206,7 +206,7 @@ namespace FootballManagerBackend.Controllers
         [HttpDelete("delete")] // DELETE /v1/medical/delete?medicalid=*
         public async Task<IActionResult> Delete(int medicalid)
         {
-            string query = "DELETE FROM medicals WHERE medicalid = :medicalid";
+            string query = "DELETE FROM medicals WHERE medical_id = :medicalid";
             var parameters = new Dictionary<string, object> { { "medicalid", medicalid } };
 
             try
