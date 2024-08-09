@@ -27,7 +27,7 @@ namespace FootballManagerBackend.Controllers
             string query;
             if (playerid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state, TO_CHAR(pred_rec_date, 'YYYY-MM-DD') AS pred_rec_date 
                 FROM medicals natural join players natural join teams WHERE player_id = :playerid";
                 var parameters = new Dictionary<string, object> { { "playerid", playerid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -35,7 +35,7 @@ namespace FootballManagerBackend.Controllers
             }
             else if (lineupid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, lineups.team_id AS team_id, team_name, hurt_part, hurt_time, medical_care, state 
+                query = @"SELECT medical_id, player_id, player_name, lineups.team_id AS team_id, team_name, hurt_part, hurt_time, medical_care, state, TO_CHAR(pred_rec_date, 'YYYY-MM-DD') AS pred_rec_date 
                 FROM medicals natural join players natural join teams, lineups 
                 WHERE lineup_id = :lineupid AND 
                 (player_id = player1_id OR player_id = player2_id OR player_id = player3_id OR 
@@ -48,7 +48,7 @@ namespace FootballManagerBackend.Controllers
             }
             else if (teamid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state, TO_CHAR(pred_rec_date, 'YYYY-MM-DD') AS pred_rec_date 
                 FROM medicals natural join players natural join teams WHERE team_id = :teamid";
                 var parameters = new Dictionary<string, object> { { "teamid", teamid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -56,7 +56,7 @@ namespace FootballManagerBackend.Controllers
             }
             else
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state, TO_CHAR(pred_rec_date, 'YYYY-MM-DD') AS pred_rec_date 
                 FROM medicals natural join players natural join teams";
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
                 return Ok(result);
@@ -66,7 +66,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")] // GET /v1/medical/displayone?medicalid=*
         public async Task<IActionResult> GetOne(int medicalid)
         {
-            string query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
+            string query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state, TO_CHAR(pred_rec_date, 'YYYY-MM-DD') AS pred_rec_date 
                 FROM medicals natural join players natural join teams WHERE medical_id = :medicalid";
             var parameters = new Dictionary<string, object> { { "medicalid", medicalid } };
 
@@ -79,9 +79,9 @@ namespace FootballManagerBackend.Controllers
         {
             string query = @"
             INSERT INTO medicals 
-            (medical_id, player_id, hurt_part, hurt_time, medical_care, state) 
+            (medical_id, player_id, hurt_part, hurt_time, medical_care, state, pred_rec_date) 
             VALUES 
-            (LINEUP_SEQ.NEXTVAL, :player_id, :hurt_part, :hurt_time, :medical_care, :state) 
+            (LINEUP_SEQ.NEXTVAL, :player_id, :hurt_part, :hurt_time, :medical_care, :state, :pred_rec_date) 
             RETURNING medical_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
@@ -112,6 +112,16 @@ namespace FootballManagerBackend.Controllers
                         break;
                     case "state":
                         parameters.Add("state", property.Value.GetInt32());
+                        break;
+                    case "pred_rec_date":
+                        if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue2))
+                        {
+                            parameters.Add("pred_rec_date", dateValue2);
+                        }
+                        else
+                        {
+                            return BadRequest(new { message = $"Invalid date format for pred_rec_date: {property.Value.GetString()}" });
+                        }
                         break;
                     default:
                         break;
@@ -179,6 +189,19 @@ namespace FootballManagerBackend.Controllers
                     case "state":
                         queryBuilder.Append("state = :state, ");
                         parameters.Add("state", property.Value.GetInt32());
+                        break;
+                    case "pred_rec_date":
+                        if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue2))
+                        {
+                            queryBuilder.Append("pred_rec_date = :pred_rec_date, ");
+                            parameters.Add("pred_rec_date", dateValue2);
+                        }
+                        else
+                        {
+                            // 返回错误信息
+                            Console.WriteLine($"Invalid date format for pred_rec_date: {property.Value.GetString()}");
+                            return BadRequest("Invalid date format for pred_rec_date.");
+                        }
                         break;
                     default:
                         break;
