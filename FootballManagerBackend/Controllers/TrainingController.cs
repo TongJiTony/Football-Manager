@@ -19,21 +19,21 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/training/displayall or GET /v1/training/displayall?teamid=* or GET /v1/training/displayall?reservationid=*
-        public async Task<IActionResult> Get(int? teamid = null, int? reservationid = null)
+        [HttpGet("displayall")] // GET /v1/training/displayall or GET /v1/training/displayall?teamid=* or GET /v1/training/displayall?stadiumid=*
+        public async Task<IActionResult> Get(int? teamid = null, int? stadiumid = null)
         {
-            string query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_reservation_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id ORDER BY training_id";
+            string query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_stadium_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id ORDER BY training_id";
             if (teamid != null)
             {
-                query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_reservation_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE train_team_id = :teamid ORDER BY training_id";
+                query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_stadium_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE train_team_id = :teamid ORDER BY training_id";
                 var parameters = new Dictionary<string, object> { { "teamid", teamid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
-            else if (reservationid != null)
+            else if (stadiumid != null)
             {
-                query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_reservation_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE train_reservation_id = :reservationid ORDER BY training_id";
-                var parameters = new Dictionary<string, object> { { "reservationid", reservationid } };
+                query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_stadium_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE train_stadium_id = :stadiumid ORDER BY training_id";
+                var parameters = new Dictionary<string, object> { { "stadiumid", stadiumid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
@@ -47,7 +47,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")] // GET /v1/training/displayone?trainingid=*
         public async Task<IActionResult> Get(int trainingid)
         {
-            string query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_reservation_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE training_id = :trainingid";
+            string query = "SELECT training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_stadium_id, train_team_id, teams.team_name AS train_team_name FROM trainings left outer join teams ON trainings.train_team_id = teams.team_id WHERE training_id = :trainingid";
             var parameters = new Dictionary<string, object> { { "trainingid", trainingid } };
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
@@ -58,9 +58,9 @@ namespace FootballManagerBackend.Controllers
         {
             string query = @"
             INSERT INTO trainings 
-            (training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_reservation_id, train_team_id) 
+            (training_id, train_focus, team_formation, train_score, team_familiarity, train_intension, train_stadium_id, train_team_id) 
             VALUES 
-            (TRAINING_SEQ.NEXTVAL, :train_focus, :team_formation, :train_score, :team_familiarity, :train_intension, :train_reservation_id, :train_team_id) 
+            (TRAINING_SEQ.NEXTVAL, :train_focus, :team_formation, :train_score, :team_familiarity, :train_intension, :train_stadium_id, :train_team_id) 
             RETURNING training_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
@@ -85,8 +85,8 @@ namespace FootballManagerBackend.Controllers
                     case "train_intension":
                         parameters.Add("train_intension", property.Value.GetString());
                         break;
-                    case "train_reservation_id":
-                        parameters.Add("train_reservation_id", property.Value.GetInt32());
+                    case "train_stadium_id":
+                        parameters.Add("train_stadium_id", property.Value.GetInt32());
                         break;
                     case "train_team_id":
                         parameters.Add("train_team_id", property.Value.GetInt32());
@@ -149,9 +149,9 @@ namespace FootballManagerBackend.Controllers
                         queryBuilder.Append("team_intension = :team_intension, ");
                         parameters.Add("team_intension", property.Value.GetString());
                         break;
-                    case "train_reservation_id":
-                        queryBuilder.Append("train_reservation_id = :train_reservation_id, ");
-                        parameters.Add("train_reservation_id", property.Value.GetInt32());
+                    case "train_stadium_id":
+                        queryBuilder.Append("train_stadium_id = :train_stadium_id, ");
+                        parameters.Add("train_stadium_id", property.Value.GetInt32());
                         break;
                     case "train_team_id":
                         queryBuilder.Append("train_team_id = :train_team_id, ");
