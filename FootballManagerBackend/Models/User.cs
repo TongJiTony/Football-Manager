@@ -81,4 +81,11 @@
         public string user_password { get; set; }
     }
 
+    public class ChangeImageRequest
+    {
+        public long user_id { get; set; }
+        public string icon { get; set; }
+        public string delete_icon { get; set; }
+    }
+
 }

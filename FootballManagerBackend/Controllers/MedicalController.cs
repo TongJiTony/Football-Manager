@@ -12,6 +12,8 @@ namespace FootballManagerBackend.Controllers
     [Route("v1/medical")]
     public class MedicalController : ControllerBase
     {
+        //类似playerlist开发模式，做成列表形式，具有返回上级功能，添加功能，删除功能，修改功能，
+        //查询功能，增改删采用弹窗的方式完成
         private readonly OracleDbContext _context;
 
         public MedicalController(OracleDbContext context)
@@ -25,7 +27,7 @@ namespace FootballManagerBackend.Controllers
             string query;
             if (playerid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
                 FROM medicals natural join players natural join teams WHERE player_id = :playerid";
                 var parameters = new Dictionary<string, object> { { "playerid", playerid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -33,7 +35,7 @@ namespace FootballManagerBackend.Controllers
             }
             else if (lineupid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, lineups.team_id AS team_id, team_name, hurt_part, hurt_time, medical_care, state
+                query = @"SELECT medical_id, player_id, player_name, lineups.team_id AS team_id, team_name, hurt_part, hurt_time, medical_care, state 
                 FROM medicals natural join players natural join teams, lineups 
                 WHERE lineup_id = :lineupid AND 
                 (player_id = player1_id OR player_id = player2_id OR player_id = player3_id OR 
@@ -46,7 +48,7 @@ namespace FootballManagerBackend.Controllers
             }
             else if (teamid != null)
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
                 FROM medicals natural join players natural join teams WHERE team_id = :teamid";
                 var parameters = new Dictionary<string, object> { { "teamid", teamid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -54,7 +56,7 @@ namespace FootballManagerBackend.Controllers
             }
             else
             {
-                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+                query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
                 FROM medicals natural join players natural join teams";
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
                 return Ok(result);
@@ -64,7 +66,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")] // GET /v1/medical/displayone?medicalid=*
         public async Task<IActionResult> GetOne(int medicalid)
         {
-            string query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state
+            string query = @"SELECT medical_id, player_id, player_name, team_id, team_name, hurt_part, hurt_time, medical_care, state 
                 FROM medicals natural join players natural join teams WHERE medical_id = :medicalid";
             var parameters = new Dictionary<string, object> { { "medicalid", medicalid } };
 
@@ -89,9 +91,6 @@ namespace FootballManagerBackend.Controllers
             {
                 switch (property.Name.ToLower())
                 {
-                    case "medical_id":
-                        parameters.Add("medical_id", property.Value.GetInt32());
-                        break;
                     case "player_id":
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
@@ -207,7 +206,7 @@ namespace FootballManagerBackend.Controllers
         [HttpDelete("delete")] // DELETE /v1/medical/delete?medicalid=*
         public async Task<IActionResult> Delete(int medicalid)
         {
-            string query = "DELETE FROM medicals WHERE medicalid = :medicalid";
+            string query = "DELETE FROM medicals WHERE medical_id = :medicalid";
             var parameters = new Dictionary<string, object> { { "medicalid", medicalid } };
 
             try
