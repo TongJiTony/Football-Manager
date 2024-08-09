@@ -24,7 +24,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("getbyRecord/{record_id}")]
         public async Task<IActionResult> GetbyRecord(string record_id)
         {
-            string query = "SELECT * FROM records WHERE record_id = :id";
+            string query = "SELECT  FROM records WHERE record_id = :id";
             var parameters = new Dictionary<string, object> { { "id", record_id } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -35,7 +35,23 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("getbyTeam/{team_id}")]
         public async Task<IActionResult> GetbyTeam(string team_id)
         {
-            string query = "SELECT * FROM records WHERE team_id = :id";
+            string query = @"
+SELECT
+    r.record_id,
+    r.team_id,
+    t.team_name,
+    TO_CHAR(r.transaction_date, 'YYYY-MM-DD') AS transaction_date,
+    r.amount,
+    r.description
+FROM
+    records r
+JOIN
+    teams t ON r.team_id = t.team_id
+WHERE
+    r.team_id = :team_id
+ORDER BY
+    r.transaction_date";
+
             var parameters = new Dictionary<string, object> { { "id", team_id } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
