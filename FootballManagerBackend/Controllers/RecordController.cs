@@ -24,7 +24,7 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayone")]
         public async Task<IActionResult> Get(string record_id)
         {
-            string query = "SELECT * FROM records WHERE record_id = :id";
+            string query = "SELECT  FROM records WHERE record_id = :id";
             var parameters = new Dictionary<string, object> { { "id", record_id } };
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
@@ -35,18 +35,29 @@ namespace FootballManagerBackend.Controllers
         [HttpGet("displayall")]
         public async Task<IActionResult> Get(int? team_id = null)
         {
-            string query = "SELECT * FROM records";
-            if (team_id != null){
-                query = "SELECT * FROM records WHERE team_id = :id";
-                var parameters = new Dictionary<string, object> { { "id", team_id } };
-                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
-                return Ok(result);
-            }
-            else
-            {
-                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
-                return Ok(result);
-            }
+
+            string query = @"
+SELECT
+    r.record_id,
+    r.team_id,
+    t.team_name,
+    TO_CHAR(r.transaction_date, 'YYYY-MM-DD') AS transaction_date,
+    r.amount,
+    r.description
+FROM
+    records r
+JOIN
+    teams t ON r.team_id = t.team_id
+WHERE
+    r.team_id = :team_id
+ORDER BY
+    r.transaction_date";
+
+            var parameters = new Dictionary<string, object> { { "id", team_id } };
+
+            List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+            return Ok(result);
+
         }
 
         // POST v1/record/add
