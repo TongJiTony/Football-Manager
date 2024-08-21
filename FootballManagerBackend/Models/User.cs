@@ -2,17 +2,18 @@
 {
     public class User
     {
-        private long userId;
+        private long userID;
         private string userName;
         private string userRight;
         private string userPassword;
         private string userPhone;
         private string icon;
+        private long teamID;
 
         public long UserId
         {
-            get { return userId; }
-            set { userId = value; }
+            get { return userID; }
+            set { userID = value; }
         }
 
         public string UserName
@@ -44,6 +45,12 @@
             get { return icon; }
             set { icon = value; }
         }
+
+        public long TeamID
+        {
+            get { return teamID; }
+            set { teamID = value; }
+        }
     }
 
     public class LoginRequest
@@ -56,7 +63,7 @@
     {
         public long user_id { get; set; }
         public string user_password { get; set; }
-        public string new_password {  get; set; }
+        public string new_password { get; set; }
     }
 
     public class JwtConfig
@@ -73,6 +80,7 @@
         public string new_name { get; set; }
         public string new_phone { get; set; }
         public string new_icon { get; set; }
+        public long new_team_id { get; set; }
     }
 
     public class DeleteRequest

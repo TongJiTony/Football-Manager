@@ -77,9 +77,6 @@ namespace FootballManagerBackend.Controllers
             {
                 switch (property.Name.ToLower())
                 {
-                    case "lineup_id":
-                        parameters.Add("lineup_id", property.Value.GetInt32());
-                        break;
                     case "note":
                         parameters.Add("note", property.Value.GetString());
                         break;
@@ -235,7 +232,7 @@ namespace FootballManagerBackend.Controllers
         [HttpDelete("delete")] // DELETE /v1/lineup/delete?lineupid=*
         public async Task<IActionResult> Delete(int lineupid)
         {
-            string query = "DELETE FROM lineups WHERE lineupid = :lineupid";
+            string query = "DELETE FROM lineups WHERE lineup_id = :lineupid";
             var parameters = new Dictionary<string, object> { { "lineupid", lineupid } };
 
             try
