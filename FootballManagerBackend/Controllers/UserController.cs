@@ -44,6 +44,7 @@ namespace FootballManagerBackend.Controllers
                     u.user_right, 
                     u.user_password, 
                     u.user_phone, 
+                    u.team_id,
                     u.icon,
                     ROW_NUMBER() OVER (ORDER BY u.user_id) AS rnum
                 FROM 
@@ -56,7 +57,7 @@ namespace FootballManagerBackend.Controllers
 
             string countQuery = @"
     SELECT COUNT(*) AS total_count
-    FROM users u
+    FROM   users u
     WHERE  u.user_name LIKE '%' || :key || '%' 
                     OR u.user_phone LIKE '%' || :key2 || '%'";
 
@@ -106,8 +107,8 @@ namespace FootballManagerBackend.Controllers
             try
             {
                 string query = @"
-                INSERT INTO users (user_id, user_name, user_right, user_password, user_phone, icon)
-                VALUES (USER_SEQ.NEXTVAL, :userName, :userRight, :userPassword, :userPhone, :icon)
+                INSERT INTO users (user_id, user_name, user_right, user_password, user_phone, icon, team_id)
+                VALUES (USER_SEQ.NEXTVAL, :userName, :userRight, :userPassword, :userPhone, :icon, :team_id)
                 RETURNING user_id INTO :new_user_id";
 
                 var parameters = new List<OracleParameter>
@@ -117,14 +118,15 @@ namespace FootballManagerBackend.Controllers
                     new OracleParameter(":userPassword", user.UserPassword),
                     new OracleParameter(":userPhone", user.UserPhone),
                     new OracleParameter(":icon", user.Icon),
+                    new OracleParameter(":team_id", user.TeamID),
                     new OracleParameter(":new_user_id", OracleDbType.Decimal, ParameterDirection.Output)
                 };
 
                 var result = await _context.ExecuteQueryWithParametersAsync(query, parameters);
 
-                if (parameters[5].Value != DBNull.Value)
+                if (parameters[6].Value != DBNull.Value)
                 {
-                    var oracleDecimal = (OracleDecimal)parameters[5].Value;
+                    var oracleDecimal = (OracleDecimal)parameters[6].Value;
                     int newUserId = oracleDecimal.ToInt32();
 
                     user.UserId = newUserId;
@@ -139,7 +141,8 @@ namespace FootballManagerBackend.Controllers
                         user_right = user.UserRight,
                         user_password = user.UserPassword,
                         user_phone = user.UserPhone,
-                        icon = user.Icon
+                        icon = user.Icon,
+                        team_id = user.TeamID
                     };
 
                     return CreatedAtAction(nameof(PostUserAdd), new { id = newUserId }, response);
@@ -149,7 +152,7 @@ namespace FootballManagerBackend.Controllers
                     var bad_response = new
                     {
                         code = 500,
-                        msg = "注册失败",
+                        msg = "注册失败"
                     };
                     return BadRequest(bad_response);
                 }
@@ -278,13 +281,14 @@ namespace FootballManagerBackend.Controllers
             try
             {
                 // 构建更新 SQL 查询和参数
-                string updateQuery = "UPDATE users SET user_name = :newName,  user_phone = :newPhone, icon = :newIcon WHERE user_id = :id";
+                string updateQuery = "UPDATE users SET user_name = :newName,  user_phone = :newPhone, icon = :newIcon, team_id = newTeamID  WHERE user_id = :id";
 
                 var updateParameters = new Dictionary<string, object>
                 {
                     { "newName", ChangeAttriReq.new_name },
                     { "newPhone", ChangeAttriReq.new_phone },
                     { "newIcon", ChangeAttriReq.new_icon },
+                    { "newTeamID", ChangeAttriReq.new_team_id },
                     { "id", ChangeAttriReq.user_id }
                 };
 
@@ -297,7 +301,7 @@ namespace FootballManagerBackend.Controllers
                     var good_response = new
                     {
                         code = 200,
-                        msg = "修改成功",
+                        msg = "修改成功"
                     };
                     return Ok(good_response);
                 }
@@ -306,7 +310,7 @@ namespace FootballManagerBackend.Controllers
                     var good_response = new
                     {
                         code = 300,
-                        msg = "用户不存在或无修改发生",
+                        msg = "用户不存在或无修改发生"
                     };
                     return NotFound(good_response);
                 }
@@ -324,7 +328,7 @@ namespace FootballManagerBackend.Controllers
             try
             {
                 // 构建更新 SQL 查询和参数
-                string updateQuery = "UPDATE users SET user_name = :newName,  user_phone = :newPhone, icon = :newIcon , user_right = :newRight , user_password = :newPwd WHERE user_id = :id";
+                string updateQuery = "UPDATE users SET user_name = :newName,  user_phone = :newPhone, icon = :newIcon , user_right = :newRight , user_password = :newPwd, team_id = newTID WHERE user_id = :id";
 
                 var updateParameters = new Dictionary<string, object>
                 {
@@ -333,6 +337,7 @@ namespace FootballManagerBackend.Controllers
                     { "newIcon", user.Icon },
                     { "newRight", user.UserRight},
                     {"newPwd", user.UserPassword },
+                    {"newTID", user.TeamID },
                     { "id", user.UserId }
                 };
 
