@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace FootballManagerBackend.Models
 {
@@ -12,13 +13,12 @@ namespace FootballManagerBackend.Models
         public Dictionary<string, object?>? Trans_plan { get; set; } //预存转会计划
         public Dictionary<string, object?>? Cont_plan { get; set; } //预存合同计划
 
-        private enum Standard
-        {
+        private readonly Dictionary<string, int> Standard = new Dictionary<string, int> {
             //系统最低转会计划判断标准，低于此标准的转会计划一定拒绝，其余的通过函数计算和随机判断
-            base_transfer_fee = 100000, //转会费最少100000
-            base_salary = 300000, //年薪最少300000
-            base_contract_length = 2 //合同最少2年
-        }
+            { "base_transfer_fee", 100000 }, //转会费最少100000
+            { "base_salary", 250000 }, //年薪最少250000
+            { "base_contract_length", 8 } //合同最长8年（最短2年)
+        };
 
         private Agent()
         {
@@ -71,7 +71,97 @@ namespace FootballManagerBackend.Models
         public string[] JudgePlan(JsonElement plan, int playerRank, string position, int age)
         {
             //根据agent的判断标准，自动判断转会计划和合同计划是否同意
-            return ["ok", "no reason"];
+            Random rand = new();
+            string reason = "";
+            DateTime start = new();
+            DateTime end = new();
+            int salary = 0;
+            int transfee = 0;
+            foreach (var item in plan.EnumerateObject())
+            {
+                if (item.Name == "start_date")
+                {
+                    start = item.Value.GetDateTime();
+                }
+                else if (item.Name == "end_date")
+                {
+                    end = item.Value.GetDateTime();
+                }
+                else if (item.Name == "salary")
+                {
+                    salary = item.Value.GetInt32();
+                }
+                else if (item.Name == "transfer_fee")
+                {
+                    transfee = item.Value.GetInt32();
+                }
+            }
+            TimeSpan diff = end - start;
+            int length = diff.Days / 365;
+
+            int new_base_transfee = Standard["base_transfer_fee"];
+            new_base_transfee += int.Max(-1500, (int)((playerRank - 85) * 4000 * (0.6 + rand.NextDouble()) + (25 - age) * 500 + rand.Next(0, 20000) + length * 7000 * (0.3 + rand.NextDouble())));
+            switch (position)
+            {
+                case "GK":
+                    new_base_transfee += (int)(10000 * rand.NextDouble());
+                    break;
+                case "F":
+                    new_base_transfee += (int)(30000 * rand.NextDouble());
+                    break;
+                case "M":
+                    new_base_transfee += (int)(20000 * rand.NextDouble());
+                    break;
+                case "B":
+                    new_base_transfee += (int)(20000 * rand.NextDouble());
+                    break;
+            }
+
+            int new_base_salary = Standard["base_salary"];
+            new_base_salary += int.Max(600000, int.Max(0, (int)((playerRank - 75) * 5000 * (0.6 + rand.NextDouble()) + (25 - age) * 2000 + rand.Next(0, 20000) + length * 1000 * (0.3 + rand.NextDouble()))));
+            switch (position)
+            {
+                case "GK":
+                    new_base_salary += (int)(50000 * rand.NextDouble());
+                    break;
+                case "F":
+                    new_base_salary += (int)(100000 * rand.NextDouble());
+                    break;
+                case "M":
+                    new_base_salary += (int)(80000 * rand.NextDouble());
+                    break;
+                case "B":
+                    new_base_salary += (int)(80000 * rand.NextDouble());
+                    break;
+            }
+            int new_base_length = Standard["base_contract_length"];
+            new_base_length += rand.Next(-4, 1);
+
+            if (transfee < new_base_transfee)
+            {
+                reason += "转会费过低，经纪人希望至少为 " + new_base_transfee + " 元；";
+            }
+            if (salary < new_base_salary)
+            {
+                reason += "球员薪水过低，经纪人希望至少为 " + new_base_salary + " 元；";
+            }
+            if (length > new_base_length)
+            {
+                reason += "合同时限过长，经纪人希望不超过 " + new_base_length + " 年；";
+            }
+            if (length < 2)
+            {
+                reason += "合同时限过短，经纪人希望至少为 2 年；";
+            }
+
+            if (reason == "")
+            {
+                return ["ok", reason ];
+            }
+            else
+            {
+                return ["no", reason.Substring(0, reason.Length - 1)];
+            }
         }
     }
 }

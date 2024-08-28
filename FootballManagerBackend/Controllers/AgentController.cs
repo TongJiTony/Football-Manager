@@ -383,8 +383,11 @@ namespace FootballManagerBackend.Controllers
                     }
                     break;
                 }
+                if (property.Name.ToLower() == "salary")
+                {
+                    parameters.Add("amount", -property.Value.GetInt32());
+                }
             }
-            parameters.Add("amount", -oldSalary);
             parameters.Add("description", "球员薪水");
 
             try
