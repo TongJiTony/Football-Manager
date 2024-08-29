@@ -334,11 +334,13 @@ namespace FootballManagerBackend.Controllers
 
             //原球队财务记录添加一条记录减少本月球员薪水支出
             query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
-            parameters = new Dictionary<string, object> {
-                { "team_id", jsonElement.GetProperty("team_id_from").GetInt32() },
-            };
+            parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
             {
+                if (property.Name.ToLower() == "team_id_from")
+                {
+                    parameters.Add("team_id", property.Value.GetInt32());
+                }
                 if (property.Name.ToLower() == "start_date")
                 {
                     if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
@@ -363,14 +365,52 @@ namespace FootballManagerBackend.Controllers
             {
                 Console.WriteLine($"Error executing DELETE request: {ex.Message}");
             }
+
+            //添加一条原球队转会费收入记录
+            query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
+            parameters = new Dictionary<string, object>();
+            foreach (var property in jsonElement.EnumerateObject())
+            {
+                if (property.Name.ToLower() == "team_id_from")
+                {
+                    parameters.Add("team_id", property.Value.GetInt32());
+                }
+                if (property.Name.ToLower() == "start_date")
+                {
+                    if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
+                    {
+                        parameters.Add("transaction_date", dateValue);
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = $"Invalid date format for start_date: {property.Value.GetString()}" });
+                    }
+                }
+                if (property.Name.ToLower() == "transfer_fees")
+                {
+                    parameters.Add("amount", property.Value.GetInt32());
+                }
+            }
+            parameters.Add("description", "转会收入");
+
+            try
+            {
+                await _context.ExecuteNonQueryAsync(query, parameters);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing DELETE request: {ex.Message}");
+            }
             
             //新球队财务记录添加一条记录增加本月球员薪水支出
             query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
-            parameters = new Dictionary<string, object> {
-                { "team_id", jsonElement.GetProperty("team_id_to").GetInt32() },
-            };
+            parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
             {
+                if (property.Name.ToLower() == "team_id_to")
+                {
+                    parameters.Add("team_id", property.Value.GetInt32());
+                }
                 if (property.Name.ToLower() == "start_date")
                 {
                     if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
@@ -389,6 +429,42 @@ namespace FootballManagerBackend.Controllers
                 }
             }
             parameters.Add("description", "球员薪水");
+
+            try
+            {
+                await _context.ExecuteNonQueryAsync(query, parameters);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing DELETE request: {ex.Message}");
+            }
+
+            //添加一条新球队转会费支出记录
+            query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
+            parameters = new Dictionary<string, object>();
+            foreach (var property in jsonElement.EnumerateObject())
+            {
+                if (property.Name.ToLower() == "team_id_to")
+                {
+                    parameters.Add("team_id", property.Value.GetInt32());
+                }
+                if (property.Name.ToLower() == "start_date")
+                {
+                    if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
+                    {
+                        parameters.Add("transaction_date", dateValue);
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = $"Invalid date format for start_date: {property.Value.GetString()}" });
+                    }
+                }
+                if (property.Name.ToLower() == "transfer_fees")
+                {
+                    parameters.Add("amount", -property.Value.GetInt32());
+                }
+            }
+            parameters.Add("description", "转会支出");
 
             try
             {
@@ -523,7 +599,7 @@ namespace FootballManagerBackend.Controllers
                     query = queryBuilder.ToString();
                     Console.WriteLine($"Generated Query: {query}");
 
-                    try
+                    try 
                     {
                         await _context.ExecuteNonQueryAsync(query, parameters);
                     }
