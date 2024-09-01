@@ -63,11 +63,13 @@ namespace FootballManagerBackend.Controllers
             //尝试连接Agent, 如果Agent被占用或用户ID未提供则返回400
             if (userid == null)
             {
-                return BadRequest("无法创建会话: 请提供您的用户名!");
+                Response.StatusCode = 403;
+                return Content("无法创建会话: 请提供您的用户名!");
             }
             if (_agent.Connection_status != "ready" && _agent.Connection_user != userid)
             {
-                return BadRequest("无法创建会话: 经纪人正在处理其他用户的转会申请!");
+                Response.StatusCode = 403;
+                return Content("无法创建会话: 经纪人正在处理其他用户的转会申请!");
             }
             if (_agent.Connection_user == userid)
             {
@@ -90,11 +92,13 @@ namespace FootballManagerBackend.Controllers
             }
             if (userid == null)
             {
-                return BadRequest("无法结束会话: 请提供您的用户名!");
+                Response.StatusCode = 403;
+                return Content("无法结束会话: 请提供您的用户名!");
             }
             if (_agent.Connection_user != userid && _agent.Connection_status != "ready")
             {
-                return BadRequest("无法结束会话: 经纪人正在处理其他用户的转会申请!");
+                Response.StatusCode = 403;
+                return Content("无法结束会话: 经纪人正在处理其他用户的转会申请!");
             }
 
             _agent.UpdateConnectionStatus("ready");
@@ -110,15 +114,18 @@ namespace FootballManagerBackend.Controllers
         {
             if (_agent.Connection_status == "ready")
             {
-                return BadRequest("无法上传转会申请: 您还没有连接上您的转会经纪人!");
+                Response.StatusCode = 403;
+                return Content("无法上传转会申请: 您还没有连接上您的转会经纪人!");
             }
             if (userid == null)
             {
-                return BadRequest("无法上传转会申请: 请提供您的用户名!");
+                Response.StatusCode = 403;
+                return Content("无法上传转会申请: 请提供您的用户名!");
             }
             if (_agent.Connection_user != userid)
             {
-                return BadRequest("无法上传转会申请: 经纪人正在处理其他用户的转会申请!");
+                Response.StatusCode = 403;
+                return Content("无法上传转会申请: 经纪人正在处理其他用户的转会申请!");
             }
 
             _agent.UpdateContractPlan(null);
@@ -236,7 +243,8 @@ namespace FootballManagerBackend.Controllers
                 _agent.UpdateTransferPlan(null);
                 _agent.UpdateContractPlan(null);
                 _agent.UpdateConnectionStatus("connected");
-                return Ok("转会经纪人已拒绝，原因是:" + result[1] + "。被拒绝的转会申请已经删除，您可以选择上传新的转会申请或结束会话!");
+                Response.StatusCode = 400;
+                return Content("转会经纪人已拒绝，原因是:" + result[1] + "。被拒绝的转会申请已经删除，您可以选择上传新的转会申请或结束会话!");
             }
         }
 
@@ -247,19 +255,23 @@ namespace FootballManagerBackend.Controllers
             //尝试确认Agent的操作, 如果Agent未连接用户、用户ID未提供、Agent被占用或未提交计划则返回400
             if (_agent.Connection_user == null)
             {
-                return BadRequest("无法确认转会: 您还没有连接上您的转会经纪人!");
+                Response.StatusCode = 403;
+                return Content("无法确认转会: 您还没有连接上您的转会经纪人!");
             }
             if (userid == null)
             {
-                return BadRequest("无法确认转会: 请提供您的用户名!");
+                Response.StatusCode = 403;
+                return Content("无法确认转会: 请提供您的用户名!");
             }
             if (_agent.Connection_user != userid)
             {
-                return BadRequest("无法确认转会: 经纪人正在处理其他用户的转会申请!");
+                Response.StatusCode = 403;
+                return Content("无法确认转会: 经纪人正在处理其他用户的转会申请!");
             }
             if (_agent.Trans_plan == null || _agent.Cont_plan == null)
             {
-                return BadRequest("无法确认转会: 您还没有提交您的转会申请!");
+                Response.StatusCode = 403;
+                return Content("无法确认转会: 您还没有提交您的转会申请!");
             }
 
             if (confirm == 0)
