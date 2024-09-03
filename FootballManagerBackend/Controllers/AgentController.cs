@@ -289,7 +289,7 @@ namespace FootballManagerBackend.Controllers
             JsonElement jsonElement = jsonDocument.RootElement;
 
             //计算原先该球员在转出球队的薪水
-            int oldSalary = 0;
+            /*int oldSalary = 0;
             string query = @"SELECT salary FROM contracts WHERE player_id = :player_id AND team_id = :team_id";
             var parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
@@ -315,11 +315,11 @@ namespace FootballManagerBackend.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error executing OPTIONS request: {ex.Message}");
-            }
+            }*/
 
             //删除原先该球员在转出球队的所有合同
-            query = @"DELETE FROM contracts WHERE player_id = :player_id AND team_id = :team_id";
-            parameters = new Dictionary<string, object>();
+            string query = @"DELETE FROM contracts WHERE player_id = :player_id AND team_id = :team_id";
+            var parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
@@ -345,7 +345,7 @@ namespace FootballManagerBackend.Controllers
             }
 
             //原球队财务记录添加一条记录减少本月球员薪水支出
-            query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
+            /*query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
             parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
             {
@@ -376,7 +376,7 @@ namespace FootballManagerBackend.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error executing DELETE request: {ex.Message}");
-            }
+            }*/
 
             //添加一条原球队转会费收入记录
             query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
@@ -415,7 +415,7 @@ namespace FootballManagerBackend.Controllers
             }
             
             //新球队财务记录添加一条记录增加本月球员薪水支出
-            query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
+            /*query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
             parameters = new Dictionary<string, object>();
             foreach (var property in jsonElement.EnumerateObject())
             {
@@ -449,7 +449,7 @@ namespace FootballManagerBackend.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error executing DELETE request: {ex.Message}");
-            }
+            }*/
 
             //添加一条新球队转会费支出记录
             query = @"INSERT INTO records (record_id, team_id, transaction_date, amount, description) VALUES (RECORD_SEQ.NEXTVAL, :team_id, :transaction_date, :amount, :description)";
