@@ -212,7 +212,7 @@ namespace FootballManagerBackend.Controllers
                 parameters.Add(new OracleParameter(":description", OracleDbType.Varchar2, $"%{description}%", ParameterDirection.Input));
             }
 
-            query.Append(" ORDER BY r.transaction_date");
+            query.Append(" ORDER BY r.description");
 
             List<Dictionary<string, object>> result = await _context.ExecuteQueryWithParametersAsync(query.ToString(), parameters);
             return Ok(result);
