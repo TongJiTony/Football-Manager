@@ -170,7 +170,7 @@ namespace FootballManagerBackend.Controllers
         {
             try
             {
-                string query = "SELECT user_password,user_right,user_name FROM users WHERE user_id = :id";
+                string query = "SELECT user_password,user_right,user_name,team_id FROM users WHERE user_id = :id";
                 var parameters = new Dictionary<string, object> { { "id", loginReq.user_id } };
 
                 List<Dictionary<string, object>> rawResult = await _context.ExecuteQueryAsync(query, parameters);
@@ -183,7 +183,7 @@ namespace FootballManagerBackend.Controllers
                     {
                         string userId = loginReq.user_id.ToString();
                         // 用户验证成功，生成并返回令牌
-                        string token = GenerateToken(userId, userRecord["USER_NAME"], userRecord["USER_RIGHT"]);
+                        string token = GenerateToken(userId, userRecord["USER_NAME"], userRecord["USER_RIGHT"], userRecord["TEAM_ID"].ToString());
                         // 返回带有令牌的成功响应
                         var good_response = new
                         {
@@ -546,13 +546,14 @@ namespace FootballManagerBackend.Controllers
             }
         }
 
-        private string GenerateToken(string userId, string userName, string userRight)
+        private string GenerateToken(string userId, string userName, string userRight, string team_id)
         {
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Name, userName),
                 new Claim(ClaimTypes.Role, userRight),
+                new Claim(ClaimTypes.GroupSid, team_id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
