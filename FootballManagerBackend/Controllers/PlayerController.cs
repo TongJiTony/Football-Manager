@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FootballManagerBackend.Controllers
 {
@@ -51,6 +53,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpGet("admin/displayall")] // GET /v1/player/displayall or GET /v1/player/displayall?page=*&limit=*&key=*
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Get(int page = 1, int limit = 10, string key = "")
         {
             int startRow = (page - 1) * limit + 1;
@@ -108,6 +111,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("add")] // POST /v1/player/add + JSON
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Add([FromBody] JsonElement playerElement)
         {
             string query = @"
@@ -279,6 +283,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpDelete("delete")] // DELETE /v1/player/delete?playerid=*
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Delete(int playerid)
         {
             string query = "DELETE FROM players WHERE player_id = :playerid";
@@ -297,6 +302,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpDelete("admin/delete")]
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> DeleteByIds([FromBody] int[] Playerids)
         {
             string query = "DELETE FROM players WHERE team_id = :id";

@@ -8,6 +8,8 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Data;
 using Microsoft.AspNetCore.Http.Extensions;
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FootballManagerBackend.Controllers
 {
