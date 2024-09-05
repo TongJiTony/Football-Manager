@@ -3,6 +3,9 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Data;
 using System.Text.Json;
+// Import Authorization method
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +24,7 @@ namespace FootballManagerBackend.Controllers
 
         // GET /v1/team//admin/displayall
         [HttpGet("admin/displayall")]
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> GetAllTeams([FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string key = "")
         {
             try
@@ -29,28 +33,28 @@ namespace FootballManagerBackend.Controllers
                 int endRow = page * limit;
 
                 string query = @"
-        SELECT * FROM (
-            SELECT 
-                t.team_id, 
-                t.team_name, 
-                TO_CHAR(t.established_date,'YYYY-MM-DD') AS established_date, 
-                t.head_coach, 
-                t.city,
-                ROW_NUMBER() OVER (ORDER BY t.team_name) AS rnum
-            FROM 
-                teams t
-            WHERE 
-                t.team_name LIKE '%' || :key || '%' 
-                OR t.city LIKE '%' || :key2 || '%'
-        ) 
-        WHERE rnum BETWEEN :startRow AND :endRow";
+                    SELECT * FROM (
+                        SELECT 
+                            t.team_id, 
+                            t.team_name, 
+                            TO_CHAR(t.established_date,'YYYY-MM-DD') AS established_date, 
+                            t.head_coach, 
+                            t.city,
+                            ROW_NUMBER() OVER (ORDER BY t.team_name) AS rnum
+                        FROM 
+                            teams t
+                        WHERE 
+                            t.team_name LIKE '%' || :key || '%' 
+                            OR t.city LIKE '%' || :key2 || '%'
+                    ) 
+                    WHERE rnum BETWEEN :startRow AND :endRow";
 
-                string countQuery = @"
-        SELECT COUNT(*) AS total_count
-        FROM teams t
-        WHERE 
-            t.team_name LIKE '%' || :key || '%' 
-            OR t.city LIKE '%' || :key2 || '%'";
+                            string countQuery = @"
+                    SELECT COUNT(*) AS total_count
+                    FROM teams t
+                    WHERE 
+                        t.team_name LIKE '%' || :key || '%' 
+                        OR t.city LIKE '%' || :key2 || '%'";
 
                 var parameters = new Dictionary<string, object>
                 {
@@ -83,15 +87,26 @@ namespace FootballManagerBackend.Controllers
 
         // GET /v1/team/displayall or GET /v1/team/displayall?teamid=*
         [HttpGet("displayall")]
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Get()
         {
             string query = "SELECT team_id,team_name, TO_CHAR(established_date,'YYYY-MM-DD') AS established_date, head_coach, city,team_icon FROM teams ORDER BY team_name";
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query);
             return Ok(result);
         }
+
         [HttpGet("displayone")]
+        [JwtAuthorize(roles: ["manager", "admin"])]
         public async Task<IActionResult> Get(string Teamid)
         {
+            if (HttpContext.Items["TeamId"] != null && Teamid != HttpContext.Items["TeamId"].ToString()){
+                return new ContentResult
+                {
+                    StatusCode = 403, // Forbidden
+                    Content = $"{Teamid} not your team. Your team is {HttpContext.Items["TeamId"]}. You do not have the necessary role to access this resource.",
+                    ContentType = "text/plain"
+                };
+            }
             string query = "SELECT team_id,team_name, TO_CHAR(established_date,'YYYY-MM-DD') AS established_date, head_coach, city,team_icon FROM teams WHERE team_id = :id";
             var parameters = new Dictionary<string, object> { { "id", Teamid } };
 
