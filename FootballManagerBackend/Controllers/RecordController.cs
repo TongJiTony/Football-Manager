@@ -24,7 +24,7 @@ namespace FootballManagerBackend.Controllers
 
         // GET v1/record/getbyRecord/{record_id}
         [HttpGet("getbyRecord/{record_id}")]
-        public async Task<IActionResult> GetbyRecord(string record_id)
+        public async Task<IActionResult> GetbyRecord(string ? record_id)
         {
             string query = @"
             SELECT 
@@ -134,7 +134,7 @@ namespace FootballManagerBackend.Controllers
 
         // DELETE v1/record/delete/{record_id}
         [HttpDelete("delete/{record_id}")]
-        public async Task<IActionResult> DeleteRecord(int record_id)
+        public async Task<IActionResult> DeleteRecord(int ?record_id)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace FootballManagerBackend.Controllers
 
         // 搜索函数，使用可变参数
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string team_id = null, [FromQuery] string transaction_date = null, [FromQuery] string min_amount = null, [FromQuery] string max_amount = null, [FromQuery] string description = null)
+        public async Task<IActionResult> Search([FromQuery] string ?team_id = null, [FromQuery] string? transaction_date = null, [FromQuery] string ?min_amount = null, [FromQuery] string? max_amount = null, [FromQuery] string? description = null)
         {
             StringBuilder query = new StringBuilder(@"
             SELECT
