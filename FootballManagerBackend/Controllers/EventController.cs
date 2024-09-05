@@ -43,63 +43,73 @@ namespace FootballManagerBackend.Controllers
         // GET /v1/event/search
         [HttpGet("search")]
         public async Task<IActionResult> Search(
-      [FromQuery] string? event_id = null,
-      [FromQuery] string? match_id = null,
-      [FromQuery] string? player_id = null,
-      [FromQuery] string? event_type = null,
-      [FromQuery] string? event_time = null)
+            [FromQuery] string? event_id = null,
+            [FromQuery] string? match_id = null,
+            [FromQuery] string? player_id = null,
+            [FromQuery] string? event_type = null,
+            [FromQuery] string? event_time = null,
+            [FromQuery] string? team_id = null)
         {
             var queryBuilder = new System.Text.StringBuilder(@"
-    SELECT 
-        event_id, 
-        match_id, 
-        player_id, 
-        player_name,
-        event_type, 
-        TO_CHAR(event_time, 'YYYY-MM-DD HH24:MI:SS') AS event_time 
-    FROM 
-        events 
-    NATURAL JOIN 
-        players 
-    WHERE 
-        1=1");
+        SELECT 
+            e.event_id, 
+            e.match_id, 
+            e.player_id, 
+            p.player_name,
+            e.event_type, 
+            TO_CHAR(e.event_time, 'YYYY-MM-DD HH24:MI:SS') AS event_time 
+        FROM 
+            events e
+        JOIN 
+            players p ON e.player_id = p.player_id
+        JOIN 
+            matches m ON e.match_id = m.match_id
+        WHERE 
+            1=1");
 
             var parameters = new Dictionary<string, object>();
 
             if (!string.IsNullOrEmpty(event_id))
             {
-                queryBuilder.Append(" AND event_id = :event_id");
+                queryBuilder.Append(" AND e.event_id = :event_id");
                 parameters.Add("event_id", event_id);
             }
 
             if (!string.IsNullOrEmpty(match_id))
             {
-                queryBuilder.Append(" AND match_id = :match_id");
+                queryBuilder.Append(" AND e.match_id = :match_id");
                 parameters.Add("match_id", match_id);
             }
 
             if (!string.IsNullOrEmpty(player_id))
             {
-                queryBuilder.Append(" AND player_id = :player_id");
+                queryBuilder.Append(" AND e.player_id = :player_id");
                 parameters.Add("player_id", player_id);
             }
 
             if (!string.IsNullOrEmpty(event_type))
             {
-                queryBuilder.Append(" AND event_type = :event_type");
+                queryBuilder.Append(" AND e.event_type = :event_type");
                 parameters.Add("event_type", event_type);
             }
 
             if (!string.IsNullOrEmpty(event_time))
             {
-                queryBuilder.Append(" AND TO_CHAR(event_time, 'YYYY-MM-DD') = :event_time");
-                parameters.Add("event_time", event_time);//搜索时，只需输入年月日即可显示当天的所有比赛事件
+                queryBuilder.Append(" AND TO_CHAR(e.event_time, 'YYYY-MM-DD') = :event_time");
+                parameters.Add("event_time", event_time); // 搜索时，只需输入年月日即可显示当天的所有比赛事件
+            }
+
+            if (!string.IsNullOrEmpty(team_id))
+            {
+                queryBuilder.Append(" AND (m.home_team_id = :team_id OR m.away_team_id = :team_id)");
+                parameters.Add("team_id", team_id);
             }
 
             string query = queryBuilder.ToString();
             List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
             return Ok(result);
         }
+
 
         // POST /v1/event/add
         [HttpPost("add")]
