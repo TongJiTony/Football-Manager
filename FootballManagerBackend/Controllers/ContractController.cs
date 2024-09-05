@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FootballManagerBackend.Controllers
 {
@@ -60,13 +62,14 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("add")] // POST /v1/contract/add + JSON
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Add([FromBody] JsonElement contractElement)
         {
             string query = @"
             INSERT INTO contracts 
-            (contract_id, player_id, team_id, start_time, end_time, salary) 
+            (contract_id, player_id, team_id, start_date, end_date, salary) 
             VALUES 
-            (CONTRACT_SEQ.NEXTVAL, :player_id, :team_id, :start_time, :end_time, :salary) 
+            (CONTRACT_SEQ.NEXTVAL, :player_id, :team_id, :start_date, :end_date, :salary) 
             RETURNING contract_id INTO :new_id";
 
             var parameters = new Dictionary<string, object>();
@@ -82,24 +85,24 @@ namespace FootballManagerBackend.Controllers
                     case "team_id":
                         parameters.Add("team_id", property.Value.GetInt32());
                         break;
-                    case "start_time":
+                    case "start_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                         {
-                            parameters.Add("start_time", dateValue);
+                            parameters.Add("start_date", dateValue);
                         }
                         else
                         {
-                            return BadRequest(new { message = $"Invalid date format for start_time: {property.Value.GetString()}" });
+                            return BadRequest(new { message = $"Invalid date format for start_date: {property.Value.GetString()}" });
                         }
                         break;
-                    case "end_time":
+                    case "end_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue2))
                         {
-                            parameters.Add("end_time", dateValue2);
+                            parameters.Add("end_date", dateValue2);
                         }
                         else
                         {
-                            return BadRequest(new { message = $"Invalid date format for end_time: {property.Value.GetString()}" });
+                            return BadRequest(new { message = $"Invalid date format for end_date: {property.Value.GetString()}" });
                         }
                         break;
                     case "salary":
@@ -117,6 +120,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("update")] // POST /v1/contract/update?contractid=* + JSON
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Update(int contractid, [FromBody] JsonElement contractElement)
         {
             if (!contractElement.EnumerateObject().Any())
@@ -151,30 +155,30 @@ namespace FootballManagerBackend.Controllers
                         queryBuilder.Append("team_id = :team_id, ");
                         parameters.Add("team_id", property.Value.GetInt32());
                         break;
-                    case "start_time":
+                    case "start_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                         {
-                            queryBuilder.Append("start_time = :start_time, ");
-                            parameters.Add("start_time", dateValue);
+                            queryBuilder.Append("start_date = :start_date, ");
+                            parameters.Add("start_date", dateValue);
                         }
                         else
                         {
                             // 返回错误信息
-                            Console.WriteLine($"Invalid date format for start_time: {property.Value.GetString()}");
-                            return BadRequest("Invalid date format for start_time.");
+                            Console.WriteLine($"Invalid date format for start_date: {property.Value.GetString()}");
+                            return BadRequest("Invalid date format for start_date.");
                         }
                         break;
-                    case "end_time":
+                    case "end_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue2))
                         {
-                            queryBuilder.Append("end_time = :end_time, ");
-                            parameters.Add("end_time", dateValue2);
+                            queryBuilder.Append("end_date = :end_date, ");
+                            parameters.Add("end_date", dateValue2);
                         }
                         else
                         {
                             // 返回错误信息
-                            Console.WriteLine($"Invalid date format for end_time: {property.Value.GetString()}");
-                            return BadRequest("Invalid date format for end_time.");
+                            Console.WriteLine($"Invalid date format for end_date: {property.Value.GetString()}");
+                            return BadRequest("Invalid date format for end_date.");
                         }
                         break;
                     case "salary":
@@ -205,6 +209,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpDelete("delete")] // DELETE /v1/contract/delete?contractid=*
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Delete(int contractid)
         {
             string query = "DELETE FROM contracts WHERE contract_id = :contractid";

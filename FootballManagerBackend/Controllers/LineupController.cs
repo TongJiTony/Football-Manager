@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FootballManagerBackend.Controllers
 {
@@ -19,8 +21,8 @@ namespace FootballManagerBackend.Controllers
             _context = context;
         }
 
-        [HttpGet("displayall")] // GET /v1/lineup/displayall or GET /v1/lineup/displayall?teamid=*
-        public async Task<IActionResult> Get(int? teamid = null)
+        [HttpGet("displayall")] // GET /v1/lineup/displayall or GET /v1/lineup/displayall?teamid=* or GET /v1/lineup/displayall?playerid=*
+        public async Task<IActionResult> Get(int? teamid = null, int? playerid = null)
         {
             string query = @"SELECT lineup_id, note, team_id, team_name, 
                 player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
@@ -33,6 +35,20 @@ namespace FootballManagerBackend.Controllers
                 player7_id, player8_id, player9_id, player10_id, player11_id 
                 FROM lineups natural join teams WHERE team_id = :teamid ORDER BY lineup_id";
                 var parameters = new Dictionary<string, object> { { "teamid", teamid } };
+                List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
+                return Ok(result);
+            }
+            else if (playerid != null)
+            {
+                query = @"SELECT lineup_id, note, team_id, team_name, 
+                player1_id, player2_id, player3_id, player4_id, player5_id, player6_id, 
+                player7_id, player8_id, player9_id, player10_id, player11_id 
+                FROM lineups natural join teams WHERE player1_id = :playerid OR 
+                player2_id = :playerid OR player3_id = :playerid OR player4_id = :playerid OR 
+                player5_id = :playerid OR player6_id = :playerid OR player7_id = :playerid OR 
+                player8_id = :playerid OR player9_id = :playerid OR player10_id = :playerid OR 
+                player11_id = :playerid ORDER BY lineup_id";
+                var parameters = new Dictionary<string, object> { { "playerid", playerid } };
                 List<Dictionary<string, object>> result = await _context.ExecuteQueryAsync(query, parameters);
                 return Ok(result);
             }
