@@ -68,7 +68,7 @@ namespace FootballManagerBackend.Models
             Cont_plan = plan;
         }
 
-        public string[] JudgePlan(JsonElement plan, int playerRank, string position, int age)
+        public string[] JudgePlan(JsonElement plan, int playerRank, string? position, int age)
         {
             //根据agent的判断标准，自动判断转会计划和合同计划是否同意
             Random rand = new();
@@ -79,21 +79,21 @@ namespace FootballManagerBackend.Models
             int transfee = 0;
             foreach (var item in plan.EnumerateObject())
             {
-                if (item.Name == "start_date")
+                switch (item.Name.ToLower())
                 {
-                    start = item.Value.GetDateTime();
-                }
-                else if (item.Name == "end_date")
-                {
-                    end = item.Value.GetDateTime();
-                }
-                else if (item.Name == "salary")
-                {
-                    salary = item.Value.GetInt32();
-                }
-                else if (item.Name == "transfer_fee")
-                {
-                    transfee = item.Value.GetInt32();
+                    case "start_date":
+                        start = DateTime.Parse(item.Value.GetString());
+                        break;
+                    case "end_date":
+                        end = DateTime.Parse(item.Value.GetString());
+                        break;
+                    case "salary":
+                        salary = item.Value.GetInt32();
+                        break;
+                    case "transfer_fees":
+                        transfee = item.Value.GetInt32();
+                        break;
+                
                 }
             }
             TimeSpan diff = end - start;
@@ -103,16 +103,16 @@ namespace FootballManagerBackend.Models
             new_base_transfee += int.Max(-1500, (int)((playerRank - 85) * 4000 * (0.6 + rand.NextDouble()) + (25 - age) * 500 + rand.Next(0, 20000) + length * 7000 * (0.3 + rand.NextDouble())));
             switch (position)
             {
-                case "GK":
+                case "守门员":
                     new_base_transfee += (int)(10000 * rand.NextDouble());
                     break;
-                case "F":
+                case "前锋":
                     new_base_transfee += (int)(30000 * rand.NextDouble());
                     break;
-                case "M":
+                case "中场":
                     new_base_transfee += (int)(20000 * rand.NextDouble());
                     break;
-                case "B":
+                case "后卫":
                     new_base_transfee += (int)(20000 * rand.NextDouble());
                     break;
             }
@@ -121,16 +121,16 @@ namespace FootballManagerBackend.Models
             new_base_salary += int.Max(600000, int.Max(0, (int)((playerRank - 75) * 5000 * (0.6 + rand.NextDouble()) + (25 - age) * 2000 + rand.Next(0, 20000) + length * 1000 * (0.3 + rand.NextDouble()))));
             switch (position)
             {
-                case "GK":
+                case "守门员":
                     new_base_salary += (int)(50000 * rand.NextDouble());
                     break;
-                case "F":
+                case "前锋":
                     new_base_salary += (int)(100000 * rand.NextDouble());
                     break;
-                case "M":
+                case "中场":
                     new_base_salary += (int)(80000 * rand.NextDouble());
                     break;
-                case "B":
+                case "后卫":
                     new_base_salary += (int)(80000 * rand.NextDouble());
                     break;
             }

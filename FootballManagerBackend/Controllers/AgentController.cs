@@ -112,7 +112,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpOptions("newplan")]
-        public async Task<IActionResult> Uploadnewplan(int? userid, [FromBody]JsonElement plan) // Options v1/agent/newplan?userid=*+JSON
+        public async Task<IActionResult> Uploadnewplan(int? userid, [FromBody] JsonElement plan) // Options v1/agent/newplan?userid=*+JSON
         {
             if (_agent.Connection_status == "ready")
             {
@@ -221,14 +221,14 @@ namespace FootballManagerBackend.Controllers
                 }
             }
             int playerRank = 0;
-            string position = "";
+            string? position = "";
             int age = 0;
             try
             {
-                var playerinfo = await _context.ExecuteQueryAsync(query, parameters);
-                playerRank = Convert.ToInt32(playerinfo[0]["rank"]);
-                position = (string)playerinfo[0]["role"];
-                age = DateTime.Now.Year - Convert.ToDateTime(playerinfo[0]["birthday"]).Year;
+                var result2 = await _context.ExecuteQueryAsync(query, parameters);
+                playerRank = Convert.ToInt32(result2[0]["RANK"]);
+                position = Convert.ToString(result2[0]["ROLE"]);
+                age = DateTime.Now.Year - Convert.ToDateTime(result2[0]["BIRTHDAY"]).Year;
             }
             catch (Exception ex)
             {
@@ -286,7 +286,7 @@ namespace FootballManagerBackend.Controllers
                 return Ok("您已主动取消转会，本次转会申请已经删除，会话已自动结束!");
             }
 
-            string jsonString = JsonSerializer.Serialize(_agent.Cont_plan);
+            string jsonString = JsonSerializer.Serialize(_agent.Trans_plan);
             JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
             JsonElement jsonElement = jsonDocument.RootElement;
 
@@ -389,7 +389,7 @@ namespace FootballManagerBackend.Controllers
                 {
                     parameters.Add("team_id", property.Value.GetInt32());
                 }
-                if (property.Name.ToLower() == "start_date")
+                if (property.Name.ToLower() == "transfer_date")
                 {
                     if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                     {
@@ -462,7 +462,7 @@ namespace FootballManagerBackend.Controllers
                 {
                     parameters.Add("team_id", property.Value.GetInt32());
                 }
-                if (property.Name.ToLower() == "start_date")
+                if (property.Name.ToLower() == "transfer_date")
                 {
                     if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                     {
@@ -490,6 +490,10 @@ namespace FootballManagerBackend.Controllers
             }
 
             //添加新合同到数据库
+            jsonString = JsonSerializer.Serialize(_agent.Cont_plan);
+            jsonDocument = JsonDocument.Parse(jsonString);
+            jsonElement = jsonDocument.RootElement;
+
             query = @"
             INSERT INTO contracts 
             (contract_id, player_id, team_id, start_date, end_date, salary) 
@@ -540,11 +544,11 @@ namespace FootballManagerBackend.Controllers
 
             await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
             int newContractId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
-
+            
             jsonString = JsonSerializer.Serialize(_agent.Trans_plan);
             jsonDocument = JsonDocument.Parse(jsonString);
             jsonElement = jsonDocument.RootElement;
-            
+
             //添加新转会记录到数据库
             query = @"
             INSERT INTO transfers 
@@ -555,14 +559,12 @@ namespace FootballManagerBackend.Controllers
 
             parameters = new Dictionary<string, object>();
             outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
+            parameters.Add("contract_id", newContractId);
 
             foreach (var property in jsonElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
-                    case "contract_id":
-                        parameters.Add("contract_id", newContractId);
-                        break;
                     case "player_id":
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
