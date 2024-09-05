@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FootballManagerBackend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FootballManagerBackend.Controllers
 {
@@ -60,6 +62,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("add")] // POST /v1/contract/add + JSON
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Add([FromBody] JsonElement contractElement)
         {
             string query = @"
@@ -117,6 +120,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpPost("update")] // POST /v1/contract/update?contractid=* + JSON
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Update(int contractid, [FromBody] JsonElement contractElement)
         {
             if (!contractElement.EnumerateObject().Any())
@@ -205,6 +209,7 @@ namespace FootballManagerBackend.Controllers
         }
 
         [HttpDelete("delete")] // DELETE /v1/contract/delete?contractid=*
+        [JwtAuthorize(roles: ["admin"])]
         public async Task<IActionResult> Delete(int contractid)
         {
             string query = "DELETE FROM contracts WHERE contract_id = :contractid";
