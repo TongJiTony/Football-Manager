@@ -568,11 +568,19 @@ namespace FootballManagerBackend.Controllers
                     case "player_id":
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
-                    case "team_id_to":
-                        parameters.Add("to", property.Value.GetInt32());
-                        break;
                     case "team_id_from":
                         parameters.Add("from", property.Value.GetInt32());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            foreach (var property in jsonElement.EnumerateObject())
+            {
+                switch (property.Name.ToLower())
+                {
+                    case "team_id_to":
+                        parameters.Add("to", property.Value.GetInt32());
                         break;
                     case "transfer_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
