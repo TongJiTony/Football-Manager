@@ -569,10 +569,10 @@ namespace FootballManagerBackend.Controllers
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
                     case "team_id_from":
-                        parameters.Add("from", property.Value.GetInt32());
+                        parameters.Add("to", property.Value.GetInt32());
                         break;
                     case "team_id_to":
-                        parameters.Add("to", property.Value.GetInt32());
+                        parameters.Add("from", property.Value.GetInt32());
                         break;
                     case "transfer_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
