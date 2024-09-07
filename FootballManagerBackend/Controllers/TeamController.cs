@@ -99,7 +99,7 @@ namespace FootballManagerBackend.Controllers
         [JwtAuthorize(roles: ["manager", "admin"])]
         public async Task<IActionResult> Get(string Teamid)
         {
-            if (HttpContext.Items["TeamId"] != null && Teamid != HttpContext.Items["TeamId"].ToString()){
+            if (HttpContext.Items["UserRole"].ToString() != "admin"  && Teamid != HttpContext.Items["TeamId"].ToString()){
                 return new ContentResult
                 {
                     StatusCode = 403, // Forbidden
