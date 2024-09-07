@@ -602,8 +602,8 @@ namespace FootballManagerBackend.Controllers
             RETURNING transfer_id INTO :new_id";
             outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
 
-            await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
-            int newTransferId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
+            await _context.ExecuteQueryAsync(query);
+            
 
             //更新球员的所属球队
             foreach (var property in jsonElement.EnumerateObject())
@@ -666,7 +666,7 @@ namespace FootballManagerBackend.Controllers
             _agent.UpdateOperatingUser(null);
             _agent.UpdateTransferPlan(null);
             _agent.UpdateContractPlan(null);
-            return Ok("您已确认转会，经纪人已经操作完成! 本次转会记录编号为" + newTransferId + "，合同编号为" + newContractId + "，祝贺您申请转会成功，会话已自动结束!");
+            return Ok("您已确认转会，经纪人已经操作完成! 本次转会后新合同编号为" + newContractId + "，祝贺您申请转会成功，会话已自动结束!");
         }
     }
 }
