@@ -54,7 +54,7 @@ namespace FootballManagerBackend.Controllers
          [FromQuery] string? match_date = null,
          [FromQuery] string? match_stadium = null,
          [FromQuery] string? home_team_id = null,
-         [FromQuery] string? away_team_id = null)
+         [FromQuery] string? away_team_id = null, [FromQuery] string? team_id = null)
         {
             var queryBuilder = new System.Text.StringBuilder(@"
         SELECT 
@@ -109,6 +109,11 @@ namespace FootballManagerBackend.Controllers
             {
                 queryBuilder.Append(" AND m.away_team_id = :away_team_id");
                 parameters.Add("away_team_id", away_team_id);
+            }
+            if (!string.IsNullOrEmpty(team_id))
+            {
+                queryBuilder.Append(" AND (m.home_team_id = :team_id OR m.away_team_id = :team_id)");
+                parameters.Add("team_id", team_id);
             }
 
             string query = queryBuilder.ToString();
