@@ -554,22 +554,20 @@ namespace FootballManagerBackend.Controllers
             INSERT INTO transfers 
             (transfer_id, contract_id, player_id, team_id_from, team_id_to, transfer_date, transfer_fees) 
             VALUES 
-            (TRANSFER_SEQ.NEXTVAL, :contract_id, :player_id, :from, :to, :transfer_date, :transfer_fees) 
-            RETURNING transfer_id INTO :new_id";
+            (TRANSFER_SEQ.NEXTVAL, ";
 
-            parameters = new Dictionary<string, object>();
-            outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
-            parameters.Add("contract_id", newContractId);
+            //:contract_id, :player_id, :from, :to, :transfer_date, :transfer_fees)
 
+            query += newContractId.ToString() + ", ";
             foreach (var property in jsonElement.EnumerateObject())
             {
                 switch (property.Name.ToLower())
                 {
                     case "player_id":
-                        parameters.Add("player_id", property.Value.GetInt32());
+                        query += property.Value.GetInt32() + ", ";
                         break;
                     case "team_id_from":
-                        parameters.Add("from", property.Value.GetInt32());
+                        query += property.Value.GetInt32() + ", ";
                         break;
                     default:
                         break;
@@ -580,12 +578,12 @@ namespace FootballManagerBackend.Controllers
                 switch (property.Name.ToLower())
                 {
                     case "team_id_to":
-                        parameters.Add("to", property.Value.GetInt32());
+                        query += property.Value.GetInt32() + ", ";
                         break;
                     case "transfer_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
                         {
-                            parameters.Add("transfer_date", dateValue);
+                            query += "TO_DATE('" + dateValue.ToString("yyyy-MM-dd") + "', 'YYYY-MM-DD'), ";
                         }
                         else
                         {
@@ -593,12 +591,16 @@ namespace FootballManagerBackend.Controllers
                         }
                         break;
                     case "transfer_fees":
-                        parameters.Add("transfer_fees", property.Value.GetInt32());
+                        query += property.Value.GetInt32() + ")";
                         break;
                     default:
                         break;
                 }
             }
+
+            query += @" 
+            RETURNING transfer_id INTO :new_id";
+            outParameter = new OracleParameter("new_id", OracleDbType.Decimal, ParameterDirection.Output);
 
             await _context.ExecuteNonQueryAsyncForAdd(query, parameters, outParameter);
             int newTransferId = Convert.ToInt32(((OracleDecimal)outParameter.Value).Value);
