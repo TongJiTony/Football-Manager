@@ -554,7 +554,7 @@ namespace FootballManagerBackend.Controllers
             INSERT INTO transfers 
             (transfer_id, contract_id, player_id, team_id_from, team_id_to, transfer_date, transfer_fees) 
             VALUES 
-            (TRANSFER_SEQ.NEXTVAL, :contract_id, :player_id, :team_id_from, :team_id_to, :transfer_date, :transfer_fees) 
+            (TRANSFER_SEQ.NEXTVAL, :contract_id, :player_id, :from, :to, :transfer_date, :transfer_fees) 
             RETURNING transfer_id INTO :new_id";
 
             parameters = new Dictionary<string, object>();
@@ -569,10 +569,10 @@ namespace FootballManagerBackend.Controllers
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
                     case "team_id_from":
-                        parameters.Add("team_id_from", property.Value.GetInt32());
+                        parameters.Add("from", property.Value.GetInt32());
                         break;
                     case "team_id_to":
-                        parameters.Add("team_id_to", property.Value.GetInt32());
+                        parameters.Add("to", property.Value.GetInt32());
                         break;
                     case "transfer_date":
                         if (DateTime.TryParse(property.Value.GetString(), out DateTime dateValue))
