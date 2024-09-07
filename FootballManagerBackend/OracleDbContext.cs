@@ -164,6 +164,7 @@
             using (var connection = new OracleConnection(_connectionString))
             {
                 await connection.OpenAsync();
+                connection.BindByName = true;
                 using (var command = new OracleCommand(query, connection))
                 {
                     if (parameters != null)
