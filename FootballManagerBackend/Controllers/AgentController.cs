@@ -566,7 +566,7 @@ namespace FootballManagerBackend.Controllers
                     case "player_id":
                         query += property.Value.GetInt32() + ", ";
                         break;
-                    case "team_id_from":
+                    case "team_id_to":
                         query += property.Value.GetInt32() + ", ";
                         break;
                     default:
@@ -577,7 +577,7 @@ namespace FootballManagerBackend.Controllers
             {
                 switch (property.Name.ToLower())
                 {
-                    case "team_id_to":
+                    case "team_id_from":
                         query += property.Value.GetInt32() + ", ";
                         break;
                     case "transfer_date":
