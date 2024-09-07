@@ -568,10 +568,10 @@ namespace FootballManagerBackend.Controllers
                     case "player_id":
                         parameters.Add("player_id", property.Value.GetInt32());
                         break;
-                    case "team_id_from":
+                    case "team_id_to":
                         parameters.Add("to", property.Value.GetInt32());
                         break;
-                    case "team_id_to":
+                    case "team_id_from":
                         parameters.Add("from", property.Value.GetInt32());
                         break;
                     case "transfer_date":
